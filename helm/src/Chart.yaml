@@ -1,0 +1,6 @@
+apiVersion: v2
+name: sistorage
+description: A service for storing and searching for SIGame packages
+type: application
+version: 1.0.0
+appVersion: 1.0.0

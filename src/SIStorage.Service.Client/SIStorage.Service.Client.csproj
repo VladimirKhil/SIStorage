@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Vladimir Khil</Authors>
+    <Description>Http client for SIStorage service</Description>
+	<SignAssembly>true</SignAssembly>
+	<AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+	<Company>Khil-soft</Company>
+	<Copyright>Copyright © Khil-soft 2021-2022</Copyright>
+    <PackageProjectUrl>https://github.com/VladimirKhil/SIStorage</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/VladimirKhil/SIStorage</RepositoryUrl>
+    <PackageTags>SIGame</PackageTags>
+    <Version>1.0.0</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.0" />
+    <PackageReference Include="System.Text.Json" Version="7.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SIStorage.Service.Contract\SIStorage.Service.Contract.csproj" />
+  </ItemGroup>
+
+</Project>

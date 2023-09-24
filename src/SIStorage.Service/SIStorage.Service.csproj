@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
+	<PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.4.0-rc.4" />
+	<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.6.0" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.14" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="0.5.0-beta.2" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SIStorage.Database\SIStorage.Database.csproj" />
+    <ProjectReference Include="..\SIStorage.Service.Contract\SIStorage.Service.Contract.csproj" />
+  </ItemGroup>
+
+</Project>

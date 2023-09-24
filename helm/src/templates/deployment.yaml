@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sistorage.fullname" . }}
+  labels:
+    {{- include "sistorage.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "sistorage.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "sistorage.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 12 }}
+      volumes:
+        - name: log
+          {{- if .Values.logPath }}
+          hostPath:
+            path: '{{- toYaml .Values.logPath }}'
+            type: Directory
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: DBPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.database.passwordKey }}'
+                  key: '{{ .Values.database.passwordValue }}'
+            - name: ConnectionStrings__SIStorage
+              value: 'Host={{ .Values.database.host }};Username={{ .Values.database.user }};Password=$(DBPASSWORD);Database={{ .Values.database.name }}'
+            - name: Serilog__MinimumLevel
+              value: '{{ .Values.options.logLevel }}'
+          volumeMounts:
+          - name: log
+            mountPath: /app/logs
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

@@ -1,0 +1,29 @@
+replicaCount: 1
+
+image:
+  repository: vladimirkhil/sistorageservice
+  pullPolicy: IfNotPresent
+  tag: 1.0.0
+
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+service:
+  type: ClusterIP
+  port: 5000
+  targetPort: 5000
+
+ingress:
+  enabled: false
+  clientSecret: ''
+  hosts: []
+  tls: []
+
+resources: {}
+
+options:
+  logLevel: Warning
