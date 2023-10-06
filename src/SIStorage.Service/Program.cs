@@ -1,6 +1,8 @@
 using AutoMapper;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Conventions;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using Serilog;
@@ -8,8 +10,10 @@ using SIStorage.Database;
 using SIStorage.Service.Configuration;
 using SIStorage.Service.Contract;
 using SIStorage.Service.Contracts;
+using SIStorage.Service.Helpers;
 using SIStorage.Service.MapperProfiles;
 using SIStorage.Service.Metrics;
+using SIStorage.Service.Middlewares;
 using SIStorage.Service.Services;
 using System.Data.Common;
 
@@ -40,6 +44,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     services.AddScoped<IFacetsApi, FacetsService>();
     services.AddScoped<IExtendedPackagesApi, PackagesService>();
+    services.AddSingleton<IPackageIndexer, PackageIndexer>();
 
     AddMetrics(services);
 }
@@ -67,9 +72,24 @@ static void ConfigureMigrationRunner(IServiceCollection services, IConfiguration
                 .ScanIn(typeof(DbConstants).Assembly).For.Migrations())
         .AddLogging(lb => lb.AddFluentMigratorConsole());
 }
-
 static void Configure(WebApplication app)
 {
+    var options = app.Services.GetRequiredService<IOptions<SIStorageOptions>>().Value;
+
+    app.UseMiddleware<ErrorHandlingMiddleware>();
+
+    if (options.ServeStaticFiles)
+    {
+        var contentPath = StringHelper.BuildRootedPath(options.ContentFolder);
+        Directory.CreateDirectory(contentPath);
+
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(contentPath),
+            ServeUnknownFileTypes = true
+        });
+    }
+
     app.UseRouting();
     app.MapControllers();
 

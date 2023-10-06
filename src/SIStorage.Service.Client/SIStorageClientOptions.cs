@@ -18,7 +18,17 @@ internal sealed class SIStorageClientOptions
     public Uri? ServiceUri { get; set; }
 
     /// <summary>
+    /// Secret to access restricted API.
+    /// </summary>
+    public string? ClientSecret { get; set; }
+
+    /// <summary>
     /// Retry count policy.
     /// </summary>
     public int RetryCount { get; set; } = DefaultRetryCount;
+
+    /// <summary>
+    /// Client timeout.
+    /// </summary>
+    public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(300);
 }

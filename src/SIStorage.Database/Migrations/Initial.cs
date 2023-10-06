@@ -6,6 +6,8 @@ namespace SIStorage.Database.Migrations;
 [Migration(202211260000, "Initial migration")]
 public sealed class Initial : Migration
 {
+    private const string RestrictionsConstraintName = $"UC_{DbConstants.Restrictions}";
+
     public override void Up()
     {
         Create.Table(DbConstants.Tags)
@@ -25,6 +27,10 @@ public sealed class Initial : Migration
             .WithColumn(nameof(RestrictionModel.Name)).AsString().NotNullable()
             .WithColumn(nameof(RestrictionModel.Value)).AsString().NotNullable();
 
+        Create.UniqueConstraint(RestrictionsConstraintName)
+            .OnTable(DbConstants.Restrictions)
+            .Columns(nameof(RestrictionModel.Name), nameof(RestrictionModel.Value));
+
         Create.Table(DbConstants.Languages)
             .WithColumn(nameof(LanguageModel.Id)).AsInt32().PrimaryKey().Identity()
             .WithColumn(nameof(LanguageModel.Code)).AsString().NotNullable().Unique();
@@ -36,6 +42,7 @@ public sealed class Initial : Migration
             .WithColumn(nameof(PackageModel.PublisherId)).AsInt32().Nullable().ForeignKey(nameof(DbConstants.Publishers), nameof(PublisherModel.Id))
             .WithColumn(nameof(PackageModel.CreateDate)).AsDate().Nullable()
             .WithColumn(nameof(PackageModel.LanguageId)).AsInt32().NotNullable().ForeignKey(nameof(DbConstants.Languages), nameof(LanguageModel.Id))
+            .WithColumn(nameof(PackageModel.OriginalFileName)).AsString().NotNullable()
             .WithColumn(nameof(PackageModel.FileName)).AsString().NotNullable()
             .WithColumn(nameof(PackageModel.LogoUri)).AsString().Nullable()
             .WithColumn(nameof(PackageModel.Downloadable)).AsBoolean().NotNullable()
@@ -43,7 +50,7 @@ public sealed class Initial : Migration
             .WithColumn(nameof(PackageModel.Size)).AsInt64().NotNullable()
             .WithColumn(nameof(PackageModel.Rounds)).AsJson().NotNullable()
             .WithColumn(nameof(PackageModel.QuestionCount)).AsInt16().NotNullable()
-            .WithColumn(nameof(PackageModel.AtomTypesStatistic)).AsJson().NotNullable();
+            .WithColumn(nameof(PackageModel.ContentTypeStatistic)).AsJson().NotNullable();
 
         Create.Table(DbConstants.PackageTags)
             .WithColumn(nameof(PackageTag.PackageId)).AsGuid().NotNullable().ForeignKey(nameof(DbConstants.Packages), nameof(PackageModel.Id))
@@ -67,6 +74,7 @@ public sealed class Initial : Migration
         Delete.Table(DbConstants.PackageTags);
         Delete.Table(DbConstants.Packages);
         Delete.Table(DbConstants.Languages);
+        Delete.UniqueConstraint(RestrictionsConstraintName).FromTable(DbConstants.Restrictions);
         Delete.Table(DbConstants.Restrictions);
         Delete.Table(DbConstants.Publishers);
         Delete.Table(DbConstants.Authors);

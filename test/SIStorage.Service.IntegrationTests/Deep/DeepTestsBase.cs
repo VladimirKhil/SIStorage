@@ -183,7 +183,8 @@ public abstract class DeepTestsBase
             Difficulty = 5,
             LanguageId = languageId,
             PublisherId = publisherId,
-            FileName = "testuri.siq",
+            OriginalFileName = "testuri.siq",
+            FileName = "file-name",
             Downloadable = true,
             DownloadCount = 0,
             Size = 100,
@@ -196,7 +197,7 @@ public abstract class DeepTestsBase
                 }
             },
             QuestionCount = 20,
-            AtomTypesStatistic = new Dictionary<string, short>
+            ContentTypeStatistic = new Dictionary<string, short>
             {
                 { "image", 3 },
                 { "audio", 2 }

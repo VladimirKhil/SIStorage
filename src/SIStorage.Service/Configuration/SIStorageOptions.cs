@@ -8,6 +8,11 @@ public sealed class SIStorageOptions
     public const string ConfigurationSectionName = "SIStorage";
 
     /// <summary>
+    /// Folder for storing service content.
+    /// </summary>
+    public string ContentFolder { get; set; } = @".\wwwroot";
+
+    /// <summary>
     /// Storage public Uri for package download.
     /// </summary>
     public Uri? PackageUri { get; set; }
@@ -18,7 +23,12 @@ public sealed class SIStorageOptions
     public Uri? LogoUri { get; set; }
 
     /// <summary>
-    /// Callback Uri for counting the number of downloads.
+    /// Service public uri.
     /// </summary>
-    public Uri? DownloadCallbackUri { get; set; }
+    public Uri? PublicUri { get; set; }
+
+    /// <summary>
+    /// Should the service serve static content by itself.
+    /// </summary>
+    public bool ServeStaticFiles { get; set; } = true;
 }

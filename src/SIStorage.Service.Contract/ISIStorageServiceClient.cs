@@ -14,4 +14,9 @@ public interface ISIStorageServiceClient
     /// API for working with packages.
     /// </summary>
     IPackagesApi Packages { get; }
+
+    /// <summary>
+    /// API for admin operations.
+    /// </summary>
+    IAdminApi Admin { get; }
 }

@@ -6,8 +6,6 @@ Allows to search packages with custom filters and sorting with paging support.
 
 The service does not operate packages files. It only manipulates packages metadata stored in a PostgreSQL database.
 
-Current implementation does not contain an API for filling and updating the storage; this should be done manually.
-
 # Localization
 
 Current architecture supposes that the SIStorage contains a predefines set of languages in Languages table.

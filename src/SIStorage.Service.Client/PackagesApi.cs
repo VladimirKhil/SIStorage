@@ -1,8 +1,8 @@
 ﻿using SIStorage.Service.Contract;
-using SIStorage.Service.Contract.Exceptions;
 using SIStorage.Service.Contract.Models;
 using SIStorage.Service.Contract.Requests;
 using SIStorage.Service.Contract.Responses;
+using System.Net;
 using System.Net.Http.Json;
 
 namespace SIStorage.Service.Client;
@@ -24,13 +24,13 @@ internal sealed class PackagesApi : IPackagesApi
         try
         {
             return await _client.GetFromJsonAsync<Package>($"packages/{packageId}", cancellationToken: cancellationToken)
-                ?? throw new PackageNotFoundException();
+                ?? throw new Exception(WellKnownSIStorageServiceErrorCode.PackageNotFound.ToString());
         }
         catch (HttpRequestException exc)
         {
-            if (exc.StatusCode == System.Net.HttpStatusCode.NotFound)
+            if (exc.StatusCode == HttpStatusCode.NotFound)
             {
-                throw new PackageNotFoundException();
+                throw new Exception(WellKnownSIStorageServiceErrorCode.PackageNotFound.ToString());
             }
 
             throw;

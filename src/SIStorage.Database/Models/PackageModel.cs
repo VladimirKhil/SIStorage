@@ -46,6 +46,12 @@ public sealed class PackageModel
     public int? LanguageId { get; set; }
 
     /// <summary>
+    /// Package original file name.
+    /// </summary>
+    [Column(DataType = DataType.NVarChar), NotNull]
+    public string? OriginalFileName { get; set; }
+
+    /// <summary>
     /// Package file name.
     /// </summary>
     [Column(DataType = DataType.NVarChar), NotNull]
@@ -76,7 +82,7 @@ public sealed class PackageModel
     public long Size { get; set; }
 
     /// <summary>
-    /// Package rounds info (serialized as json).
+    /// Package rounds info.
     /// </summary>
     [Column(DataType = DataType.Json), NotNull]
     public RoundModel[]? Rounds { get; set; }
@@ -88,8 +94,8 @@ public sealed class PackageModel
     public short? QuestionCount { get; set; }
 
     /// <summary>
-    /// Package atom type statistic. Keys are atom types; values are the counts of specified atom types in package.
+    /// Package content type statistic. Keys are content types; values are the counts of specified content types in package.
     /// </summary>
     [Column(DataType = DataType.Json), NotNull]
-    public Dictionary<string, short>? AtomTypesStatistic { get; set; }
+    public Dictionary<string, short>? ContentTypeStatistic { get; set; }
 }

@@ -22,6 +22,8 @@ public abstract class ShallowTestsBase
 
     protected IPackagesApi PackagesApi => SIStorageClient.Packages;
 
+    protected IAdminApi AdminApi => SIStorageClient.Admin;
+
     public ShallowTestsBase()
     {
         var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");

@@ -60,6 +60,11 @@ public sealed record Package
     public Uri? ContentUri { get; set; }
 
     /// <summary>
+    /// Package direct content location (this link usage would not increase download counter).
+    /// </summary>
+    public Uri? DirectContentUri { get; set; }
+
+    /// <summary>
     /// Package logo location.
     /// </summary>
     public Uri? LogoUri { get; set; }
@@ -80,9 +85,9 @@ public sealed record Package
     public short? QuestionCount { get; set; }
 
     /// <summary>
-    /// Package atom type statistic. Keys are atom types; values are the counts of specified atom types in package.
+    /// Package content type statistic. Keys are content types; values are the counts of specified content types in package.
     /// </summary>
-    public Dictionary<string, short>? AtomTypesStatistic { get; set; }
+    public Dictionary<string, short>? ContentTypeStatistic { get; set; }
 
     /// <summary>
     /// Package download count.

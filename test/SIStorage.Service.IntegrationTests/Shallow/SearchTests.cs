@@ -4,7 +4,7 @@ using SIStorage.Service.Contract.Requests;
 
 namespace SIStorage.Service.IntegrationTests.Shallow;
 
-internal sealed class SIStorageTests : ShallowTestsBase
+internal sealed class SearchTests : ShallowTestsBase
 {
     [Test]
     public async Task SearchByPublishers_Ok()

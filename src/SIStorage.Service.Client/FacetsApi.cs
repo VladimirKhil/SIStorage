@@ -4,7 +4,7 @@ using System.Net.Http.Json;
 
 namespace SIStorage.Service.Client;
 
-internal class FacetsApi : IFacetsApi
+internal sealed class FacetsApi : IFacetsApi
 {
     private readonly HttpClient _client;
 

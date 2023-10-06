@@ -20,7 +20,7 @@ public sealed class PackagesApiTests : DeepTestsBase
             Assert.AreEqual(expectedPackage.Size, package.Size);
             Assert.AreEqual(expectedPackage.DownloadCount, package.DownloadCount);
             Assert.AreEqual(expectedPackage.QuestionCount, package.QuestionCount);
-            Assert.AreEqual(expectedPackage.AtomTypesStatistic, package.AtomTypesStatistic);
+            Assert.AreEqual(expectedPackage.ContentTypeStatistic, package.ContentTypeStatistic);
             Assert.IsNotNull(package.ContentUri);
             Assert.AreEqual(expectedPackage.CreateDate, package.CreateDate);
             Assert.AreEqual(expectedPackage.Difficulty, package.Difficulty);

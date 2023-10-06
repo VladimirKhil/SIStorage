@@ -22,12 +22,9 @@ public sealed class PackagesController : ControllerBase
     /// This API is not included in client library. It is called implicitly when trying to download the package.
     /// </remarks>
     [HttpGet("{packageId}/download")]
-    public IActionResult GetDownloadLinkAsync(Guid packageId, string callbackUri)
+    public async Task<IActionResult> GetDownloadLinkAsync(Guid packageId, string callbackUri, CancellationToken cancellationToken)
     {
-        // Allows to increment package download counter asyncronously
-        // Just returns the provided callbackIds
-        // Do not await for faster response
-        _packagesApi.IncrementDownloadCount(packageId);
+        await _packagesApi.IncrementDownloadCountAsync(packageId, cancellationToken);
 
         return Redirect(callbackUri);
     }
