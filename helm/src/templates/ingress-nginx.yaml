@@ -1,13 +1,13 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "sistorage.fullname" . -}}
+{{- $fullName := include "sicontent.fullname" . -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullName }}-nginx
   labels:
     {{- include "sistorage.labels" . | nindent 4 }}
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /api/v1/$1/$2/$3
+    nginx.ingress.kubernetes.io/rewrite-target: /$1/$2
     {{- if .Values.ingress.annotations -}}
     {{- toYaml .Values.ingress.annotations | nindent 4 }}
     {{- end }}
@@ -28,13 +28,13 @@ spec:
     - http:
         paths:
           {{- range .paths }}
-          - path: {{ . }}/api/v1/(facets|packages)(/|$)(.*)
+          - path: {{ . }}/(packages|logo)/(.+)
             pathType: Prefix
             backend:
               service:
                 name: {{ $fullName }}
                 port:
-                  name: http
+                  name: httpnginx
           {{- end }}
     {{- end }}
   {{- end }}

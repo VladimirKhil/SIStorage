@@ -2,16 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Vladimir Khil</Authors>
     <Description>Http client for SIStorage service</Description>
 	<SignAssembly>true</SignAssembly>
 	<AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
-	<Company>Khil-soft</Company>
-	<Copyright>Copyright © Khil-soft 2021-2022</Copyright>
+	<Copyright>Copyright © Khil-soft 2021-2023</Copyright>
     <PackageProjectUrl>https://github.com/VladimirKhil/SIStorage</PackageProjectUrl>
     <RepositoryUrl>https://github.com/VladimirKhil/SIStorage</RepositoryUrl>
-    <PackageTags>SIGame</PackageTags>
+    <PackageTags>SIStorage</PackageTags>
+	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>VKhil.SIStorage.Client</PackageId>
     <Version>1.0.0</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<ImplicitUsings>enable</ImplicitUsings>
@@ -44,6 +44,18 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  
+  <ItemGroup>
+	<None Include="key.snk" />
+	<None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+	</None>
+	<None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+	</None>
   </ItemGroup>
 
 </Project>

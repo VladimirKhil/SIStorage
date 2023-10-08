@@ -7,6 +7,7 @@ using System.Net.Http.Json;
 
 namespace SIStorage.Service.Client;
 
+/// <inheritdoc />
 internal sealed class PackagesApi : IPackagesApi
 {
     private readonly HttpClient _client;

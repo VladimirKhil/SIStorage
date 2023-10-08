@@ -28,11 +28,6 @@ public sealed class PackageIndexer : IPackageIndexer
                 {
                     foreach (var content in question.GetContent())
                     {
-                        if (content.Type == AtomTypes.Text)
-                        {
-                            continue;
-                        }
-
                         contentTypeStatistic.TryGetValue(content.Type, out var count);
                         contentTypeStatistic[content.Type] = (short)(count + 1);
                     }
