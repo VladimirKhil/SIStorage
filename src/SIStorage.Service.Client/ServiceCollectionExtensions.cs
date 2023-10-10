@@ -32,7 +32,7 @@ public static class ServiceCollectionExtensions
                 if (options != null)
                 {
                     var serviceUri = options.ServiceUri;
-                    client.BaseAddress = serviceUri != null ? new Uri(serviceUri, "/api/v1/") : null;
+                    client.BaseAddress = serviceUri != null ? new Uri(serviceUri, "api/v1/") : null;
                     client.Timeout = options.Timeout;
 
                     SetAuthSecret(options, client);

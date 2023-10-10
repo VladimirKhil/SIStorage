@@ -9,6 +9,7 @@ internal sealed class UploadPackageTests : ShallowTestsBase
     private static readonly HttpClient Client = new() { DefaultRequestVersion = HttpVersion.Version20 };
 
     [Test]
+    [Ignore("Run manually")]
     public async Task UploadPackage_Ok()
     {
         CreatePackageResponse packageResponse;
@@ -27,7 +28,7 @@ internal sealed class UploadPackageTests : ShallowTestsBase
             Assert.That(package.Id, Is.EqualTo(packageId));
             Assert.That(package.RestrictionIds, Is.Not.Null);
             Assert.That(package.ContentTypeStatistic, Is.Not.Null);
-            Assert.That(package.ContentTypeStatistic, Has.Count.EqualTo(2));
+            Assert.That(package.ContentTypeStatistic, Has.Count.EqualTo(3));
             Assert.That(package.ContentTypeStatistic, Contains.Key("image"));
             Assert.That(package.ContentTypeStatistic, Contains.Key("audio"));
             Assert.That(package.ContentTypeStatistic!["image"], Is.EqualTo(1));

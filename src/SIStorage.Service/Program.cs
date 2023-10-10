@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using AutoMapper;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Conventions;
@@ -46,6 +47,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddScoped<IExtendedPackagesApi, PackagesService>();
     services.AddSingleton<IPackageIndexer, PackageIndexer>();
 
+    AddRateLimits(services, configuration);
     AddMetrics(services);
 }
 
@@ -93,10 +95,21 @@ static void Configure(WebApplication app)
     app.UseRouting();
     app.MapControllers();
 
+    app.UseIpRateLimiting();
+
     CreateDatabase(app);
     ApplyMigrations(app);
 
     app.UseOpenTelemetryPrometheusScrapingEndpoint();
+}
+
+static void AddRateLimits(IServiceCollection services, IConfiguration configuration)
+{
+    services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimit"));
+
+    services.AddMemoryCache();
+    services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+    services.AddInMemoryRateLimiting();
 }
 
 static void AddMetrics(IServiceCollection services)

@@ -1,5 +1,5 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "sicontent.fullname" . -}}
+{{- $fullName := include "sistorage.fullname" . -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

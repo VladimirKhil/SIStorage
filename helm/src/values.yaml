@@ -16,6 +16,7 @@ fullnameOverride: ""
 podAnnotations: {}
 
 podSecurityContext: {}
+securityContext: {}
 
 service:
   type: ClusterIP
@@ -48,8 +49,8 @@ database:
   passwordValue: 'postgres-password'
 
 options:
-  serveStaticFiles: false
-  logLevel: Warning
-  packageUri: ''
-  logoUri: ''
-  publicUri: ''
+ serveStaticFiles: false
+ logLevel: Warning
+ packageUri: ''
+ logoUri: ''
+ publicUri: ''
