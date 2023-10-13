@@ -147,24 +147,30 @@ public sealed class AdminController : ControllerBase
 
             var packageName = StringHelper.UnquoteValue(packageNameValue);
 
-            var packageId = Guid.NewGuid();
-            var packageFileName = Path.ChangeExtension(packageId.ToString(), "siq");
+            Guid packageId;
+            string packageFileName;
+
+            using var documentStream = System.IO.File.OpenRead(targetFilePath);
+            using var document = SIDocument.Load(documentStream);
+            {
+                if (!Guid.TryParse(document.Package.ID, out packageId))
+                {
+                    packageId = Guid.NewGuid();
+                }
+
+                packageFileName = Path.ChangeExtension(packageId.ToString(), "siq");
+                var packageMetadata = _packageIndexer.IndexPackage(document);
+                var packageLogo = document.Package.LogoItem;
+                var logoUri = await GetLogoUriAsync(document, packageLogo, packageId, cancellationToken);
+
+                await _packagesApi.AddPackageAsync(packageId, packageName, packageMetadata, packageFileName, fileLength, logoUri, cancellationToken);
+            }
+
             var packagesFolder = Path.Combine(StringHelper.BuildRootedPath(_options.ContentFolder), PackagesFolder);
             Directory.CreateDirectory(packagesFolder);
             var packageFile = Path.Combine(packagesFolder, packageFileName);
 
             System.IO.File.Move(targetFilePath, packageFile);
-
-            using var documentStream = System.IO.File.OpenRead(packageFile);
-            using var document = SIDocument.Load(documentStream);
-
-            var packageMetadata = _packageIndexer.IndexPackage(document);
-
-            var packageLogo = document.Package.LogoItem;
-
-            var logoUri = await GetLogoUriAsync(document, packageLogo, packageId, cancellationToken);
-
-            await _packagesApi.AddPackageAsync(packageId, packageName, packageMetadata, packageFileName, fileLength, logoUri, cancellationToken);
 
             return packageId;
         }
