@@ -56,8 +56,8 @@ public sealed class PackagesController : ControllerBase
                 : null,
 
             PublisherId = publisherId,
-            RestrictionIds = restrictionIds?.Split(',').Select(r => int.Parse(r)).ToArray(),
-            TagIds = tagIds?.Split(',').Select(r => int.Parse(r)).ToArray(),
+            RestrictionIds = restrictionIds?.Split(',').Select(int.Parse).ToArray(),
+            TagIds = tagIds?.Split(',').Select(int.Parse).ToArray(),
             AuthorId = authorId,
             LanguageId = languageId,
             SearchText = searchText

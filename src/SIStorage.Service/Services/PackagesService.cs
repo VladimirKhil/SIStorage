@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using LinqToDB;
+using LinqToDB.Common;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using SIStorage.Database;
@@ -67,17 +68,17 @@ internal sealed class PackagesService : IExtendedPackagesApi
     {
         IQueryable<PackageModel> packages = _connection.Packages;
 
-        if (packageFilters.TagIds != null)
+        if (!packageFilters.TagIds.IsNullOrEmpty())
         {
-            if (packageFilters.TagIds.Any())
+            if (packageFilters.TagIds.Length == 1 && packageFilters.TagIds[0] == -1)
+            {
+                packages = packages.Where(p => !_connection.PackageTags.Any(pt => pt.PackageId == p.Id));
+            }
+            else
             {
                 packages = packages.Where(
                     p => _connection.PackageTags.Any(
                         pt => pt.PackageId == p.Id && packageFilters.TagIds.Contains(pt.TagId)));
-            }
-            else
-            {
-                packages = packages.Where(p => !_connection.PackageTags.Any(pt => pt.PackageId == p.Id));
             }
         }
 
@@ -86,17 +87,17 @@ internal sealed class PackagesService : IExtendedPackagesApi
             packages = packages.Where(BuildDifficultyPredicate(packageFilters.Difficulty));
         }
 
-        if (packageFilters.RestrictionIds != null)
+        if (!packageFilters.RestrictionIds.IsNullOrEmpty())
         {
-            if (packageFilters.RestrictionIds.Any())
+            if (packageFilters.RestrictionIds.Length == 1 && packageFilters.RestrictionIds[0] == -1)
+            {
+                packages = packages.Where(p => !_connection.PackageRestrictions.Any(pr => pr.PackageId == p.Id));
+            }
+            else
             {
                 packages = packages.Where(
                     p => _connection.PackageRestrictions.Any(
                         pr => pr.PackageId == p.Id && packageFilters.RestrictionIds.Contains(pr.RestrictionId)));
-            }
-            else
-            {
-                packages = packages.Where(p => !_connection.PackageRestrictions.Any(pr => pr.PackageId == p.Id));
             }
         }
 
