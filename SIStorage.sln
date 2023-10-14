@@ -24,6 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIStorage.Database", "src\SIStorage.Database\SIStorage.Database.csproj", "{0B83DD0C-C366-4F03-81DB-6013580CD2CD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIStorage.Uploader", "src\SIStorage.Uploader\SIStorage.Uploader.csproj", "{69DC884F-AE28-4412-847D-D1AF538C1AE7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{0B83DD0C-C366-4F03-81DB-6013580CD2CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B83DD0C-C366-4F03-81DB-6013580CD2CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B83DD0C-C366-4F03-81DB-6013580CD2CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69DC884F-AE28-4412-847D-D1AF538C1AE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69DC884F-AE28-4412-847D-D1AF538C1AE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69DC884F-AE28-4412-847D-D1AF538C1AE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69DC884F-AE28-4412-847D-D1AF538C1AE7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +66,7 @@ Global
 		{68C93218-3600-4D6B-A82B-DACE6CC65706} = {1325292B-1E08-447E-B8CE-3CCE6F03F57F}
 		{0759C880-EC31-4EF8-9C77-000BF6F57CAE} = {45079F87-F3E6-46C2-B6C7-459F1B938A06}
 		{0B83DD0C-C366-4F03-81DB-6013580CD2CD} = {1325292B-1E08-447E-B8CE-3CCE6F03F57F}
+		{69DC884F-AE28-4412-847D-D1AF538C1AE7} = {1325292B-1E08-447E-B8CE-3CCE6F03F57F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {24634C04-1C32-47EE-ACB6-0A8C9D441FA1}

@@ -67,11 +67,18 @@ internal sealed class PackagesService : IExtendedPackagesApi
     {
         IQueryable<PackageModel> packages = _connection.Packages;
 
-        if (packageFilters.TagIds != null && packageFilters.TagIds.Any())
+        if (packageFilters.TagIds != null)
         {
-            packages = packages.Where(
-                p => _connection.PackageTags.Any(
-                    pt => pt.PackageId == p.Id && packageFilters.TagIds.Contains(pt.TagId)));
+            if (packageFilters.TagIds.Any())
+            {
+                packages = packages.Where(
+                    p => _connection.PackageTags.Any(
+                        pt => pt.PackageId == p.Id && packageFilters.TagIds.Contains(pt.TagId)));
+            }
+            else
+            {
+                packages = packages.Where(p => !_connection.PackageTags.Any(pt => pt.PackageId == p.Id));
+            }
         }
 
         if (packageFilters.Difficulty != null)
@@ -81,9 +88,16 @@ internal sealed class PackagesService : IExtendedPackagesApi
 
         if (packageFilters.RestrictionIds != null)
         {
-            packages = packages.Where(
-                p => _connection.PackageRestrictions.Any(
-                    pr => pr.PackageId == p.Id && packageFilters.RestrictionIds.Contains(pr.RestrictionId)));
+            if (packageFilters.RestrictionIds.Any())
+            {
+                packages = packages.Where(
+                    p => _connection.PackageRestrictions.Any(
+                        pr => pr.PackageId == p.Id && packageFilters.RestrictionIds.Contains(pr.RestrictionId)));
+            }
+            else
+            {
+                packages = packages.Where(p => !_connection.PackageRestrictions.Any(pr => pr.PackageId == p.Id));
+            }
         }
 
         if (packageFilters.AuthorId != null)
