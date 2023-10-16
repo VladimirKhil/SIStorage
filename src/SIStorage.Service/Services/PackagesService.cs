@@ -110,7 +110,14 @@ internal sealed class PackagesService : IExtendedPackagesApi
 
         if (packageFilters.PublisherId.HasValue)
         {
-            packages = packages.Where(p => p.PublisherId == packageFilters.PublisherId);
+            if (packageFilters.PublisherId.Value == -1)
+            {
+                packages = packages.Where(p => p.PublisherId == null);
+            }
+            else
+            {
+                packages = packages.Where(p => p.PublisherId == packageFilters.PublisherId);
+            }
         }
 
         if (packageFilters.LanguageId.HasValue)
@@ -271,7 +278,10 @@ internal sealed class PackagesService : IExtendedPackagesApi
         CancellationToken cancellationToken)
     {
         var languageId = await InsertLanguageAsync(packageMetadata.Language == "en-US" ? "en-US" : "ru-RU" , cancellationToken);
-        var publisherId = await InsertPublisherAsync(packageMetadata.Publisher ?? "", cancellationToken);
+        
+        int? publisherId = string.IsNullOrEmpty(packageMetadata.Publisher)
+            ? null
+            : await InsertPublisherAsync(packageMetadata.Publisher ?? "", cancellationToken);
 
         await _connection.Packages.InsertAsync(
             () => new PackageModel
