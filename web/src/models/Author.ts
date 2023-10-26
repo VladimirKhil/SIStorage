@@ -1,7 +1,7 @@
 /** Provides a package author info. */
 export default interface Author {
 	/** Author identifier. */
-	id: string;
+	id: number;
 
 	/** Author name. */
 	name: string;

@@ -1,7 +1,7 @@
 /** Provides a package publisher info. */
 export default interface Publisher {
 	/** Publisher identifier. */
-	id: string;
+	id: number;
 
 	/** Publisher name. */
 	name: string;
