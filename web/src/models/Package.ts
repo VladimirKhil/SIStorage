@@ -20,8 +20,14 @@ export default interface Package {
 	/** Package publisher identifier. */
 	publisherId?: number;
 
+	/** Package authors identifiers. */
+	authorIds?: number[];
+
 	/** Package create date. You can use a string for date representation in TypeScript. */
 	createDate?: Date;
+
+	/** Package tags identifiers. */
+	tagIds?: number[];
 
 	/** Package language code. */
 	languageId?: number;
