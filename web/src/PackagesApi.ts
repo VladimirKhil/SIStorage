@@ -32,7 +32,7 @@ export default class PackagesApi {
 		}
 
 		if (packageFilters.difficulty) {
-			query["difficulty"] = packageFilters.difficulty.toString();
+			query["difficulty"] = packageFilters.difficulty.value.toString();
 			query["difficultyCompareMode"] = packageFilters.difficulty.compareMode;
 		}
 
