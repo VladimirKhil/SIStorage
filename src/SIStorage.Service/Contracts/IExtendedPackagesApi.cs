@@ -33,4 +33,9 @@ public interface IExtendedPackagesApi : IPackagesApi
     /// <param name="packageId">Package identifier.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task IncrementDownloadCountAsync(Guid packageId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Cleans temporary packages. 
+    /// </summary>
+    void CleanTempPackages();
 }

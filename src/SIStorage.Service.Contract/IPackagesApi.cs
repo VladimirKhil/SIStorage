@@ -28,4 +28,13 @@ public interface IPackagesApi
         PackageFilters packageFilters,
         PackageSelectionParameters packageSelectionParameters,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets random package.
+    /// </summary>
+    /// <param name="randomPackageParameters">Random package parameters.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task<Package> GetRandomPackageAsync(
+        RandomPackageParameters randomPackageParameters,
+        CancellationToken cancellationToken = default);
 }

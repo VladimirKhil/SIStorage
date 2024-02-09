@@ -73,4 +73,12 @@ public sealed class PackagesController : ControllerBase
 
         return _packagesApi.GetPackagesAsync(packageFilters, packageSelectionParameters, cancellationToken);
     }
+
+    [HttpPost("random")]
+    public Task<Package> PostRandomAsync(
+        RandomPackageParameters packageParameters,
+        CancellationToken cancellationToken = default)
+    {
+        return _packagesApi.GetRandomPackageAsync(packageParameters, cancellationToken);
+    }
 }

@@ -31,4 +31,9 @@ public sealed class SIStorageOptions
     /// Should the service serve static content by itself.
     /// </summary>
     public bool ServeStaticFiles { get; set; } = true;
+
+    /// <summary>
+    /// Packages cleaning interval.
+    /// </summary>
+    public TimeSpan CleaningInterval { get; set; } = TimeSpan.FromMinutes(30);
 }

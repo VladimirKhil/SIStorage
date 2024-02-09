@@ -90,4 +90,19 @@ internal sealed class PackagesApi : IPackagesApi
 
         return (await _client.GetFromJsonAsync<PackagesPage>($"packages?{queryArgs}", cancellationToken)) ?? PackagesPage.Empty;
     }
+
+    public async Task<Package> GetRandomPackageAsync(RandomPackageParameters randomPackageParameters, CancellationToken cancellationToken = default)
+    {
+        using var response = await _client.PostAsJsonAsync("packages/random", randomPackageParameters, cancellationToken: cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException(await response.Content.ReadAsStringAsync(cancellationToken), null, response.StatusCode);
+        }
+
+        var package = await response.Content.ReadFromJsonAsync<Package>(cancellationToken: cancellationToken)
+            ?? throw new Exception(WellKnownSIStorageServiceErrorCode.PackageNotFound.ToString());
+
+        return package;
+    }
 }

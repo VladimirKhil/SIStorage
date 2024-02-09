@@ -50,6 +50,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddScoped<IExtendedPackagesApi, PackagesService>();
     services.AddSingleton<IPackageIndexer, PackageIndexer>();
 
+    services.AddHostedService<TempPackagesCleaner>();
+
     AddRateLimits(services, configuration);
     AddMetrics(services);
 }

@@ -5,6 +5,8 @@ namespace SIStorage.Service.Client;
 /// <inheritdoc cref="ISIStorageServiceClient" />
 internal sealed class SIStorageServiceClient : ISIStorageServiceClient
 {
+    public IInfoApi Info { get; }
+
     public IFacetsApi Facets { get; }
 
     public IPackagesApi Packages { get; }
@@ -17,6 +19,7 @@ internal sealed class SIStorageServiceClient : ISIStorageServiceClient
     /// <param name="client">HTTP client to use.</param>
     public SIStorageServiceClient(HttpClient client)
     {
+        Info = new InfoApi(client);
         Facets = new FacetsApi(client);
         Packages = new PackagesApi(client);
         Admin = new AdminApi(client);

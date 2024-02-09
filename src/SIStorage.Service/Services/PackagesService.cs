@@ -2,7 +2,6 @@
 using LinqToDB;
 using LinqToDB.Common;
 using Microsoft.Extensions.Options;
-using Npgsql;
 using SIStorage.Database;
 using SIStorage.Database.Models;
 using SIStorage.Service.Configuration;
@@ -431,6 +430,25 @@ internal sealed class PackagesService : IExtendedPackagesApi
             cancellationToken);
 
         return (await _connection.Restrictions.FirstAsync(r => r.Name == name && r.Value == value, token: cancellationToken)).Id;
+    }
+
+    public async Task<Package> GetRandomPackageAsync(RandomPackageParameters randomPackageParameters, CancellationToken cancellationToken = default)
+    {
+        // TODO: generate random package, save it to temporary folder accessible by NGinx and return a link to it
+
+        return new Package
+        {
+            TagIds = randomPackageParameters.TagIds ?? Array.Empty<int>(),
+            Difficulty = randomPackageParameters.Difficulty,
+            RestrictionIds = randomPackageParameters.RestrictionIds ?? Array.Empty<int>(),
+            LanguageId = randomPackageParameters.LanguageId
+        };
+    }
+
+    public void CleanTempPackages()
+    {
+        // TODO: clean old packages from temporary folder
+        throw new NotImplementedException();
     }
 
     private sealed record EnrichedPackage(PackageModel Package, int[] TagIds, int[] AuthorIds, int[] RestrictionIds);

@@ -6,6 +6,11 @@
 public interface ISIStorageServiceClient
 {
     /// <summary>
+    /// API for getting storage info.
+    /// </summary>
+    IInfoApi Info { get; }
+
+    /// <summary>
     /// API for working with facets.
     /// </summary>
     IFacetsApi Facets { get; }
