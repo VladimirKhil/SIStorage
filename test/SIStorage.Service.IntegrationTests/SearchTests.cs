@@ -2,9 +2,9 @@
 using SIStorage.Service.Contract.Models;
 using SIStorage.Service.Contract.Requests;
 
-namespace SIStorage.Service.IntegrationTests.Shallow;
+namespace SIStorage.Service.IntegrationTests;
 
-internal sealed class SearchTests : ShallowTestsBase
+internal sealed class SearchTests : TestsBase
 {
     [Test]
     public async Task SearchByPublishers_Ok()

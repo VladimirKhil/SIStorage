@@ -1,31 +1,34 @@
-﻿using LinqToDB;
+﻿using AutoMapper;
+using LinqToDB;
 using LinqToDB.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NUnit.Framework;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using SIStorage.Database;
 using SIStorage.Database.Models;
-using SIStorage.Service.Client;
+using SIStorage.Service.Configuration;
 using SIStorage.Service.Contract;
 using SIStorage.Service.Contract.Common;
+using SIStorage.Service.Contracts;
+using SIStorage.Service.MapperProfiles;
+using SIStorage.Service.Services;
 using System.Linq.Expressions;
 
-namespace SIStorage.Service.IntegrationTests.Deep;
+namespace SIStorage.Service.ComponentTests;
 
 /// <summary>
-/// Provides base methods for SIStorage service integration tests.
+/// Provides base methods for SIStorage service component tests.
 /// </summary>
 /// <remarks>
 /// SIStorage service and PostgreSQL must be started before tests to run.
 /// This tests class clears the provided database, fills it with test data and then checks the SIStorage API.
 /// </remarks>
-public abstract class DeepTestsBase
+public abstract class TestsBase
 {
-    protected ISIStorageServiceClient SIStorageClient { get; }
+    protected IFacetsApi FacetsApi { get; }
 
-    protected IFacetsApi FacetsApi => SIStorageClient.Facets;
-
-    protected IPackagesApi PackagesApi => SIStorageClient.Packages;
+    protected IExtendedPackagesApi PackagesApi { get; }
 
     protected SIStorageDbConnection DbConnection { get; }
 
@@ -43,19 +46,28 @@ public abstract class DeepTestsBase
 
     protected Guid Package5Id { get; private set; }
 
-    public DeepTestsBase()
+    public TestsBase()
     {
         var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
         var configuration = builder.Build();
 
-        var serviceCollection = new ServiceCollection();
-        serviceCollection.AddSIStorageServiceClient(configuration);
+        var services = new ServiceCollection();
+        var mapperConfiguration = new MapperConfiguration(cfg => cfg.AddProfile<SIStorageProfile>());
+        var mapper = mapperConfiguration.CreateMapper();
 
-        // Because there is no REST API for adding database enties yet, we will use direct database connection for data initialization
-        serviceCollection.AddSIStorageDatabase(configuration);
+        services.AddSingleton(mapper);
+        services.Configure<SIStorageOptions>(configuration.GetSection(SIStorageOptions.ConfigurationSectionName));
+        services.AddSIStorageDatabase(configuration);
+        services.AddSingleton<ILoggerFactory, NullLoggerFactory>();
+        services.AddSingleton<ILogger<PackagesService>, NullLogger<PackagesService>>();
+        services.AddScoped<IFacetsApi, FacetsService>();
+        services.AddScoped<IExtendedPackagesApi, PackagesService>();
+        services.AddSingleton<ITempPackagesService, TempPackagesService>();
 
-        var serviceProvider = serviceCollection.BuildServiceProvider();
-        SIStorageClient = serviceProvider.GetRequiredService<ISIStorageServiceClient>();
+        var serviceProvider = services.BuildServiceProvider();
+
+        FacetsApi = serviceProvider.GetRequiredService<IFacetsApi>();
+        PackagesApi = serviceProvider.GetRequiredService<IExtendedPackagesApi>();
 
         DbConnection = serviceProvider.GetRequiredService<SIStorageDbConnection>();
     }
@@ -190,11 +202,7 @@ public abstract class DeepTestsBase
             Size = 100,
             Rounds = new RoundModel[]
             {
-                new RoundModel
-                {
-                    Name = "round1",
-                    ThemeNames = new string[] { "theme1", "theme2", "theme3" }
-                }
+                new("round1", new[] { "theme1", "theme2", "theme3" })
             },
             QuestionCount = 20,
             ContentTypeStatistic = new Dictionary<string, short>

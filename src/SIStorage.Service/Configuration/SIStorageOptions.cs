@@ -18,6 +18,11 @@ public sealed class SIStorageOptions
     public Uri? PackageUri { get; set; }
 
     /// <summary>
+    /// Storage public Uri for temporary package download.
+    /// </summary>
+    public Uri? TempUri { get; set; }
+
+    /// <summary>
     /// Storage public Uri for logo download.
     /// </summary>
     public Uri? LogoUri { get; set; }
@@ -36,4 +41,9 @@ public sealed class SIStorageOptions
     /// Packages cleaning interval.
     /// </summary>
     public TimeSpan CleaningInterval { get; set; } = TimeSpan.FromMinutes(30);
+
+    /// <summary>
+    /// Temporary package lifetime.
+    /// </summary>
+    public TimeSpan TempPackageLifetime { get; set; } = TimeSpan.FromMinutes(10);
 }

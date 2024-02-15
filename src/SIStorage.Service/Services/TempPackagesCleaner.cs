@@ -9,16 +9,16 @@ namespace SIStorage.Service.Services;
 /// </summary>
 internal sealed class TempPackagesCleaner : BackgroundService
 {
-    private readonly IExtendedPackagesApi _packagesApi;
+    private readonly ITempPackagesService _tempPackagesService;
     private readonly SIStorageOptions _options;
     private readonly ILogger<TempPackagesCleaner> _logger;
 
     public TempPackagesCleaner(
-        IExtendedPackagesApi packagesApi,
+        ITempPackagesService tempPackagesService,
         IOptions<SIStorageOptions> options,
         ILogger<TempPackagesCleaner> logger)
     {
-        _packagesApi = packagesApi;
+        _tempPackagesService = tempPackagesService;
         _options = options.Value;
         _logger = logger;
     }
@@ -33,7 +33,7 @@ internal sealed class TempPackagesCleaner : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            _packagesApi.CleanTempPackages();
+            _tempPackagesService.Clean();
             await Task.Delay(_options.CleaningInterval, stoppingToken);
         }
     }

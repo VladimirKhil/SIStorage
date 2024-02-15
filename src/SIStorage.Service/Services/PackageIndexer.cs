@@ -1,5 +1,4 @@
 ﻿using SIPackages;
-using SIPackages.Core;
 using SIStorage.Database.Models;
 using SIStorage.Service.Contracts;
 using SIStorage.Service.Models;
@@ -18,7 +17,7 @@ public sealed class PackageIndexer : IPackageIndexer
 
         foreach (var round in document.Package.Rounds)
         {
-            rounds.Add(new RoundModel { Name = round.Name, ThemeNames = round.Themes.Select(t => t.Name).ToArray() });
+            rounds.Add(new RoundModel(round.Name, round.Themes.Select(t => t.Name).ToArray()));
 
             foreach (var theme in round.Themes)
             {

@@ -3,18 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using SIStorage.Service.Client;
 using SIStorage.Service.Contract;
 
-namespace SIStorage.Service.IntegrationTests.Shallow;
+namespace SIStorage.Service.IntegrationTests;
 
 /// <summary>
 /// Provides base methods for SIStorage service integration tests.
 /// </summary>
 /// <remarks>
-/// Storage service and PostgreSQL must be started before tests to run.
-/// This tests class does not communicate with the database directly.
-/// It assumes the the databse already has some data and makes several checks agains it.
-/// It checks the correctness of SIStorage API.
-/// </remarks>
-public abstract class ShallowTestsBase
+public abstract class TestsBase
 {
     protected ISIStorageServiceClient SIStorageClient { get; }
 
@@ -24,7 +19,7 @@ public abstract class ShallowTestsBase
 
     protected IAdminApi AdminApi => SIStorageClient.Admin;
 
-    public ShallowTestsBase()
+    public TestsBase()
     {
         var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
         var configuration = builder.Build();

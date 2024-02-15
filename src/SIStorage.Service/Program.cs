@@ -48,6 +48,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     services.AddScoped<IFacetsApi, FacetsService>();
     services.AddScoped<IExtendedPackagesApi, PackagesService>();
+    services.AddSingleton<ITempPackagesService, TempPackagesService>();
     services.AddSingleton<IPackageIndexer, PackageIndexer>();
 
     services.AddHostedService<TempPackagesCleaner>();

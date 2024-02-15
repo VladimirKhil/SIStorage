@@ -2,9 +2,9 @@
 using SIStorage.Service.Contract.Responses;
 using System.Net;
 
-namespace SIStorage.Service.IntegrationTests.Shallow;
+namespace SIStorage.Service.IntegrationTests;
 
-internal sealed class UploadPackageTests : ShallowTestsBase
+internal sealed class UploadPackageTests : TestsBase
 {
     private static readonly HttpClient Client = new() { DefaultRequestVersion = HttpVersion.Version20 };
 

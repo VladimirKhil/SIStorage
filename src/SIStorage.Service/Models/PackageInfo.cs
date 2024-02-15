@@ -34,7 +34,7 @@ public sealed class PackageInfo
     /// <summary>
     /// Package rounds info.
     /// </summary>
-    public RoundModel[]? Rounds { get; set; }
+    public RoundModel[] Rounds { get; set; } = Array.Empty<RoundModel>();
 
     /// <summary>
     /// Package total question count.

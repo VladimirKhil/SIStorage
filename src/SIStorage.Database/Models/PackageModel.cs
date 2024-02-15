@@ -85,7 +85,7 @@ public sealed class PackageModel
     /// Package rounds info.
     /// </summary>
     [Column(DataType = DataType.Json), NotNull]
-    public RoundModel[]? Rounds { get; set; }
+    public RoundModel[] Rounds { get; set; } = Array.Empty<RoundModel>();
 
     /// <summary>
     /// Package total question count.

@@ -7,7 +7,7 @@ using SIStorage.Service.Contract.Models;
 
 namespace SIStorage.Service.Services;
 
-internal sealed class FacetsService : IFacetsApi
+public sealed class FacetsService : IFacetsApi
 {
     private readonly SIStorageDbConnection _siStorageDbConnection;
     private readonly IMapper _mapper;

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -20,7 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SIStorage.Database\SIStorage.Database.csproj" />
     <ProjectReference Include="..\..\src\SIStorage.Service.Client\SIStorage.Service.Client.csproj" />
   </ItemGroup>
 

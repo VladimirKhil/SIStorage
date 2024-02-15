@@ -6,15 +6,6 @@
 /// <remarks>
 /// This model is embedded into packages table.
 /// </remarks>
-public sealed class RoundModel
-{
-    /// <summary>
-    /// Round name.
-    /// </summary>
-    public string? Name { get; set; }
-
-    /// <summary>
-    /// Round themes names.
-    /// </summary>
-    public string[]? ThemeNames { get; set; }
-}
+/// <param name="Name">Round name.</param>
+/// <param name="ThemeNames">Round themes names.</param>
+public sealed record RoundModel(string Name, string[] ThemeNames);

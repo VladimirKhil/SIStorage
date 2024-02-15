@@ -11,6 +11,7 @@ using SIStorage.Service.Contract.Requests;
 using SIStorage.Service.Contract.Responses;
 using SIStorage.Service.Contracts;
 using SIStorage.Service.Exceptions;
+using SIStorage.Service.Helpers;
 using SIStorage.Service.Models;
 using System.Linq.Expressions;
 using System.Net;
@@ -18,19 +19,26 @@ using System.Net;
 namespace SIStorage.Service.Services;
 
 /// <inheritdoc cref="IExtendedPackagesApi" />
-internal sealed class PackagesService : IExtendedPackagesApi
+public sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
 {
+    private const string PackagesFolder = "packages";
+    private const int RandomPackageSourceCount = 10;
+    private static readonly PackageGeneratorParameters _generatorParameters = new(3, 6, 7, 100);
+
+    private readonly ITempPackagesService _tempPackagesService;
     private readonly SIStorageDbConnection _connection;
     private readonly SIStorageOptions _options;
     private readonly IMapper _mapper;
     private readonly ILogger<PackagesService> _logger;
 
     public PackagesService(
+        ITempPackagesService tempPackagesService,
         SIStorageDbConnection connection,
         IOptions<SIStorageOptions> options,
         IMapper mapper,
         ILogger<PackagesService> logger)
     {
+        _tempPackagesService = tempPackagesService;
         _connection = connection;
         _options = options.Value;
         _mapper = mapper;
@@ -66,39 +74,14 @@ internal sealed class PackagesService : IExtendedPackagesApi
         CancellationToken cancellationToken = default)
     {
         IQueryable<PackageModel> packages = _connection.Packages;
-
-        if (!packageFilters.TagIds.IsNullOrEmpty())
-        {
-            if (packageFilters.TagIds.Length == 1 && packageFilters.TagIds[0] == -1)
-            {
-                packages = packages.Where(p => !_connection.PackageTags.Any(pt => pt.PackageId == p.Id));
-            }
-            else
-            {
-                packages = packages.Where(
-                    p => _connection.PackageTags.Any(
-                        pt => pt.PackageId == p.Id && packageFilters.TagIds.Contains(pt.TagId)));
-            }
-        }
+        packages = BuildTagFilter(packageFilters.TagIds, packages);
 
         if (packageFilters.Difficulty != null)
         {
             packages = packages.Where(BuildDifficultyPredicate(packageFilters.Difficulty));
         }
 
-        if (!packageFilters.RestrictionIds.IsNullOrEmpty())
-        {
-            if (packageFilters.RestrictionIds.Length == 1 && packageFilters.RestrictionIds[0] == -1)
-            {
-                packages = packages.Where(p => !_connection.PackageRestrictions.Any(pr => pr.PackageId == p.Id));
-            }
-            else
-            {
-                packages = packages.Where(
-                    p => _connection.PackageRestrictions.Any(
-                        pr => pr.PackageId == p.Id && packageFilters.RestrictionIds.Contains(pr.RestrictionId)));
-            }
-        }
+        packages = BuildRestrictionFilter(packageFilters.RestrictionIds, packages);
 
         if (packageFilters.AuthorId != null)
         {
@@ -119,10 +102,7 @@ internal sealed class PackagesService : IExtendedPackagesApi
             }
         }
 
-        if (packageFilters.LanguageId.HasValue)
-        {
-            packages = packages.Where(p => p.LanguageId == packageFilters.LanguageId);
-        }
+        packages = BuildLanguageFilter(packageFilters.LanguageId, packages);
 
         if (packageFilters.SearchText != null)
         {
@@ -186,6 +166,43 @@ internal sealed class PackagesService : IExtendedPackagesApi
             Packages = resultPackages,
             Total = totalPackages,
         };
+    }
+
+    private static IQueryable<PackageModel> BuildLanguageFilter(int? languageId, IQueryable<PackageModel> packages) =>
+        languageId.HasValue ? packages.Where(p => p.LanguageId == languageId) : packages;
+
+    private IQueryable<PackageModel> BuildRestrictionFilter(int[]? restrictionIds, IQueryable<PackageModel> packages)
+    {
+        if (restrictionIds.IsNullOrEmpty())
+        {
+            return packages;
+        }
+
+        if (restrictionIds.Length == 1 && restrictionIds[0] == -1)
+        {
+            return packages.Where(p => !_connection.PackageRestrictions.Any(pr => pr.PackageId == p.Id));
+        }
+
+        return packages.Where(
+            p => _connection.PackageRestrictions.Any(
+                pr => pr.PackageId == p.Id && restrictionIds.Contains(pr.RestrictionId)));
+    }
+
+    private IQueryable<PackageModel> BuildTagFilter(int[]? tagIds, IQueryable<PackageModel> packages)
+    {
+        if (tagIds.IsNullOrEmpty())
+        {
+            return packages;
+        }
+
+        if (tagIds.Length == 1 && tagIds[0] == -1)
+        {
+            return packages.Where(p => !_connection.PackageTags.Any(pt => pt.PackageId == p.Id));
+        }
+
+        return packages.Where(
+            p => _connection.PackageTags.Any(
+                pt => pt.PackageId == p.Id && tagIds.Contains(pt.TagId)));
     }
 
     private Package ToPackage(EnrichedPackage enriched)
@@ -434,10 +451,43 @@ internal sealed class PackagesService : IExtendedPackagesApi
 
     public async Task<Package> GetRandomPackageAsync(RandomPackageParameters randomPackageParameters, CancellationToken cancellationToken = default)
     {
-        // TODO: generate random package, save it to temporary folder accessible by NGinx and return a link to it
+        IQueryable<PackageModel> packages = _connection.Packages;
+        
+        packages = BuildTagFilter(randomPackageParameters.TagIds, packages);
+        packages = BuildRestrictionFilter(randomPackageParameters.RestrictionIds, packages);
+        packages = BuildDifficultyFilter(randomPackageParameters.Difficulty, packages);
+        packages = BuildLanguageFilter(randomPackageParameters.LanguageId, packages);
+
+        var sourcePackages = await packages.Take(RandomPackageSourceCount).Select(p => new PackageMetadata(p.Id, p.Rounds)).ToArrayAsync(cancellationToken);
+
+        if (sourcePackages.Length == 0)
+        {
+            throw new ServiceException(WellKnownSIStorageServiceErrorCode.PackageNotFound, HttpStatusCode.NotFound);
+        }
+
+        if (sourcePackages.Length == 1)
+        {
+            return await GetPackageAsync(sourcePackages[0].Id, cancellationToken);
+        }
+
+        var packageId = Guid.NewGuid();
+        var filePath = _tempPackagesService.GenerateFilePath(packageId);
+        var fileName = Path.GetFileName(filePath);
+
+        using (var fileStream = File.Create(filePath))
+        using (var package = await RandomPackageGenerator.GeneratePackageAsync(fileStream, this, sourcePackages, _generatorParameters, cancellationToken))
+        {
+            package.Save();
+        }
 
         return new Package
         {
+            Id = packageId,
+            ContentUri = new Uri(_options.TempUri + fileName, UriKind.Absolute),
+            DirectContentUri = new Uri(_options.TempUri + fileName, UriKind.Absolute),
+            CreateDate = DateOnly.FromDateTime(DateTime.UtcNow),
+            DownloadCount = 0,
+            Size = new FileInfo(filePath).Length,
             TagIds = randomPackageParameters.TagIds ?? Array.Empty<int>(),
             Difficulty = randomPackageParameters.Difficulty,
             RestrictionIds = randomPackageParameters.RestrictionIds ?? Array.Empty<int>(),
@@ -445,10 +495,21 @@ internal sealed class PackagesService : IExtendedPackagesApi
         };
     }
 
-    public void CleanTempPackages()
+    private static IQueryable<PackageModel> BuildDifficultyFilter(short? difficulty, IQueryable<PackageModel> packages) =>
+        difficulty.HasValue ? packages.Where(p => p.Difficulty == difficulty) : packages;
+
+    public Task<SIPackages.SIDocument> GetPackageAsync(string packageId, CancellationToken cancellationToken = default)
     {
-        // TODO: clean old packages from temporary folder
-        throw new NotImplementedException();
+        var packagesFolder = Path.Combine(StringHelper.BuildRootedPath(_options.ContentFolder), PackagesFolder);
+        var packagesFile = Path.Combine(packagesFolder, packageId);
+
+        if (!File.Exists(packagesFile))
+        {
+            _logger.LogWarning("Cannot find file {fileName}", packagesFile);
+            throw new ServiceException(WellKnownSIStorageServiceErrorCode.PackageNotFound, HttpStatusCode.InternalServerError);
+        }
+
+        return Task.FromResult(SIPackages.SIDocument.Load(File.OpenRead(packagesFile)));
     }
 
     private sealed record EnrichedPackage(PackageModel Package, int[] TagIds, int[] AuthorIds, int[] RestrictionIds);

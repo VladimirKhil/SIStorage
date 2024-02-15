@@ -77,7 +77,7 @@ public sealed record Package
     /// <summary>
     /// Package rounds info.
     /// </summary>
-    public Round[]? Rounds { get; set; }
+    public Round[] Rounds { get; set; } = Array.Empty<Round>();
 
     /// <summary>
     /// Package total question count.

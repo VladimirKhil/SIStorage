@@ -1,9 +1,8 @@
-using NUnit.Framework;
 using SIStorage.Service.Contract.Models;
 
-namespace SIStorage.Service.IntegrationTests.Deep;
+namespace SIStorage.Service.ComponentTests;
 
-public sealed class FacetsApiTests : DeepTestsBase
+public sealed class FacetsApiTests : TestsBase
 {
     [Test]
     public async Task GetTags_Ok()
