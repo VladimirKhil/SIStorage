@@ -15,6 +15,7 @@ using SIStorage.Service.Helpers;
 using SIStorage.Service.Models;
 using System.Linq.Expressions;
 using System.Net;
+using static LinqToDB.Sql;
 
 namespace SIStorage.Service.Services;
 
@@ -458,7 +459,9 @@ public sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
         packages = BuildDifficultyFilter(randomPackageParameters.Difficulty, packages);
         packages = BuildLanguageFilter(randomPackageParameters.LanguageId, packages);
 
-        var sourcePackages = await packages.Take(RandomPackageSourceCount).Select(p => new PackageMetadata(p.Id, p.Rounds)).ToArrayAsync(cancellationToken);
+        packages = packages.OrderBy(p => Random()).Take(RandomPackageSourceCount);
+
+        var sourcePackages = await packages.Select(p => new PackageMetadata(p.Id, p.Rounds)).ToArrayAsync(cancellationToken);
 
         if (sourcePackages.Length == 0)
         {
@@ -470,14 +473,39 @@ public sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
             return await GetPackageAsync(sourcePackages[0].Id, cancellationToken);
         }
 
+        var tags = randomPackageParameters.TagIds.IsNullOrEmpty()
+            ? Array.Empty<string>()
+            : await _connection.Tags.Where(t => randomPackageParameters.TagIds.Contains(t.Id)).Select(t => t.Name).ToArrayAsync(cancellationToken);
+
+        var restrictions = randomPackageParameters.RestrictionIds.IsNullOrEmpty()
+            ? Array.Empty<string>()
+            : await _connection.Restrictions.Where(r => randomPackageParameters.RestrictionIds.Contains(r.Id)).Select(r => r.Value).ToArrayAsync(cancellationToken);
+
+        var language = randomPackageParameters.LanguageId == null
+            ? null
+            : await _connection.Languages.Where(l => l.Id == randomPackageParameters.LanguageId).Select(l => l.Code).FirstOrDefaultAsync(cancellationToken);
+
         var packageId = Guid.NewGuid();
         var filePath = _tempPackagesService.GenerateFilePath(packageId);
         var fileName = Path.GetFileName(filePath);
 
         using (var fileStream = File.Create(filePath))
-        using (var package = await RandomPackageGenerator.GeneratePackageAsync(fileStream, this, sourcePackages, _generatorParameters, cancellationToken))
+        using (var document = await RandomPackageGenerator.GeneratePackageAsync(fileStream, this, sourcePackages, _generatorParameters, cancellationToken))
         {
-            package.Save();
+            document.Package.Tags.AddRange(tags);
+            document.Package.Restriction = string.Join(", ", restrictions);
+
+            if (language != null)
+            {
+                document.Package.Language = language;
+            }
+
+            if (randomPackageParameters.Difficulty.HasValue)
+            {
+                document.Package.Difficulty = randomPackageParameters.Difficulty.Value;
+            }
+
+            document.Save();
         }
 
         return new Package
@@ -501,7 +529,7 @@ public sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
     public Task<SIPackages.SIDocument> GetPackageAsync(string packageId, CancellationToken cancellationToken = default)
     {
         var packagesFolder = Path.Combine(StringHelper.BuildRootedPath(_options.ContentFolder), PackagesFolder);
-        var packagesFile = Path.Combine(packagesFolder, packageId);
+        var packagesFile = Path.ChangeExtension(Path.Combine(packagesFolder, packageId), "siq");
 
         if (!File.Exists(packagesFile))
         {
@@ -513,4 +541,7 @@ public sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
     }
 
     private sealed record EnrichedPackage(PackageModel Package, int[] TagIds, int[] AuthorIds, int[] RestrictionIds);
+
+    [Function("random", ServerSideOnly = true, CanBeNull = false, IsPure = false)]
+    private static Guid Random() => Guid.NewGuid();
 }

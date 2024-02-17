@@ -7,6 +7,7 @@ using SIPackages;
 using SIStorage.Service.Attributes;
 using SIStorage.Service.Configuration;
 using SIStorage.Service.Contract.Models;
+using SIStorage.Service.Contract.Requests;
 using SIStorage.Service.Contract.Responses;
 using SIStorage.Service.Contracts;
 using SIStorage.Service.Exceptions;
@@ -231,5 +232,13 @@ public sealed class AdminController : ControllerBase
         }
 
         return null;
+    }
+
+    [HttpPost("random")]
+    public Task<Contract.Models.Package> PostRandomAsync(
+        RandomPackageParameters packageParameters,
+        CancellationToken cancellationToken = default)
+    {
+        return _packagesApi.GetRandomPackageAsync(packageParameters, cancellationToken);
     }
 }

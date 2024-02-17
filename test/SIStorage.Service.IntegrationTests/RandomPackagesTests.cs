@@ -8,7 +8,11 @@ internal sealed class RandomPackagesTests : TestsBase
     [Test]
     public async Task GeneratePackage_Ok()
     {
-        var package = await PackagesApi.GetRandomPackageAsync(new RandomPackageParameters());
+        var package = await PackagesApi.GetRandomPackageAsync(new RandomPackageParameters
+        {
+            RestrictionIds = new int[] { -1 }
+        });
+
         Assert.That(package, Is.Not.Null);
     }
 }

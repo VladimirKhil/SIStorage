@@ -40,4 +40,16 @@ public sealed class PackagesApiTests : TestsBase
         Assert.That(package, Is.Not.Null);
         Assert.That(package.Id, Is.EqualTo(expectedPackage.Id));
     }
+
+    [Test]
+    [Ignore("Run manually")]
+    public async Task GetRandomPackage_Ok()
+    {
+        var package = await PackagesApi.GetRandomPackageAsync(new Contract.Requests.RandomPackageParameters
+        {
+            RestrictionIds = new int[] { -1 }
+        });
+
+        Assert.That(package, Is.Not.Null);
+    }
 }

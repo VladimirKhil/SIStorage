@@ -19,5 +19,5 @@ public sealed class TagModel
     /// Tag name.
     /// </summary>
     [Column(DataType = DataType.NVarChar), NotNull]
-    public string? Name { get; set; }
+    public string Name { get; set; } = "";
 }
