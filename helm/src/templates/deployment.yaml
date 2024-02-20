@@ -81,6 +81,8 @@ spec:
               value: '{{ .Values.options.logoUri }}'
             - name: SIStorage__PublicUri
               value: '{{ .Values.options.publicUri }}'
+            - name: SIStorage__TempUri
+              value: '{{ .Values.options.tempUri }}'
             - name: SIStorage__ServeStaticFiles
               value: '{{ .Values.options.serveStaticFiles }}'
           volumeMounts:
