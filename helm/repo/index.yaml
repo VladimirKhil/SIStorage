@@ -2,8 +2,18 @@ apiVersion: v1
 entries:
   sistorage:
   - apiVersion: v2
+    appVersion: 1.1.2
+    created: "2024-02-20T09:20:17.3186591+01:00"
+    description: A service for storing and searching for SIGame packages
+    digest: 537a3333c671cb858a49c7ebf5aa3ff826b529d626bfaab5001aa0328a91439c
+    name: sistorage
+    type: application
+    urls:
+    - sistorage-1.1.2.tgz
+    version: 1.1.2
+  - apiVersion: v2
     appVersion: 1.1.1
-    created: "2024-02-20T09:15:21.5592241+01:00"
+    created: "2024-02-20T09:20:01.622459+01:00"
     description: A service for storing and searching for SIGame packages
     digest: 90e9fe9a921c034a3504699ea9db813f87d87f8e1b50d5944e584458c15d71c6
     name: sistorage
@@ -13,7 +23,7 @@ entries:
     version: 1.1.1
   - apiVersion: v2
     appVersion: 1.1.0
-    created: "2024-02-20T09:15:21.558175+01:00"
+    created: "2024-02-20T09:20:01.6202741+01:00"
     description: A service for storing and searching for SIGame packages
     digest: b6fbf9b226a4548e6e00dd3c0a546165fbb488f58636e096e0d652736f3a2ff3
     name: sistorage
@@ -23,7 +33,7 @@ entries:
     version: 1.1.0
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2024-02-20T09:15:21.5576547+01:00"
+    created: "2024-02-20T09:20:01.6157386+01:00"
     description: A service for storing and searching for SIGame packages
     digest: 05aab546c2bbbd545af1e69f1bbec8ba8436cbc4b8d6334258775bd22fcb1424
     name: sistorage
@@ -33,7 +43,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-02-20T09:15:21.5470131+01:00"
+    created: "2024-02-20T09:20:01.6124419+01:00"
     description: A service for storing and searching for SIGame packages
     digest: cf43e184f2ae1949a32aa8a16a89851a973c2b24c1cc912303f43e2ac5e39af6
     name: sistorage
@@ -41,4 +51,4 @@ entries:
     urls:
     - sistorage-1.0.0.tgz
     version: 1.0.0
-generated: "2024-02-20T09:15:21.5418288+01:00"
+generated: "2024-02-20T09:20:01.6054835+01:00"

@@ -28,7 +28,7 @@ spec:
     - http:
         paths:
           {{- range .paths }}
-          - path: {{ . }}/(packages|logo)/(.+)
+          - path: {{ . }}/(packages|temp|logo)/(.+)
             pathType: Prefix
             backend:
               service:
