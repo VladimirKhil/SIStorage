@@ -5,6 +5,7 @@ import PackageSelectionParameters from './models/PackageSelectionParameters';
 import PackageSortDirection from './models/PackageSortDirection';
 import PackageSortMode from './models/PackageSortMode';
 import PackagesPage from './models/PackagesPage';
+import RandomPackageParameters from './models/RandomPackageParameters';
 
 /** Provides API for working with packages. */
 export default class PackagesApi {
@@ -64,5 +65,23 @@ export default class PackagesApi {
 		const queryArgs = Object.entries(query).map(([key, value]) => `${key}=${value}`).join("&");
 
 		return getAsync<PackagesPage>(`${this.baseUri}?${queryArgs}`);
+	}
+
+	/** Gets random package. */
+	async getRandomPackageAsync(randomPackageParameters: RandomPackageParameters) {
+		const response = await fetch(`${this.baseUri}random`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(randomPackageParameters)
+		});
+
+		if (!response.ok) {
+			throw new Error(`${response.status} ${await response.text()}`);
+		}
+
+		const packageJson = await response.json();
+		return packageJson as Package;
 	}
 }

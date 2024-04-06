@@ -64,3 +64,10 @@ test('Get package', async () => {
 	const packageInfo = await siStorageClient.packages.getPackageAsync(packages.packages[0].id);
 	expect(packageInfo).not.toBeNull();
 });
+
+test('Get random package', async () => {
+	const packageInfo = await siStorageClient.packages.getRandomPackageAsync({ restrictionIds: [-1] });
+	expect(packageInfo).not.toBeNull();
+	expect(packageInfo.restrictionIds).toStrictEqual([-1]);
+	console.log(packageInfo.contentUri);
+});
