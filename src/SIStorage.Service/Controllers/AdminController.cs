@@ -21,6 +21,7 @@ namespace SIStorage.Service.Controllers;
 /// </summary>
 [Route("api/v1/admin")]
 [ApiController]
+[Produces("application/json")]
 public sealed class AdminController : ControllerBase
 {
     private static readonly FormOptions DefaultFormOptions = new();
@@ -33,6 +34,13 @@ public sealed class AdminController : ControllerBase
     private readonly SIStorageOptions _options;
     private readonly ILogger<AdminController> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="PackagesController" />.
+    /// </summary>
+    /// <param name="packageIndexer">Package indexer.</param>
+    /// <param name="packagesApi">Packages API.</param>
+    /// <param name="options">Service options.</param>
+    /// <param name="logger">Service logger.</param>
     public AdminController(
         IPackageIndexer packageIndexer,
         IExtendedPackagesApi packagesApi,
@@ -45,6 +53,9 @@ public sealed class AdminController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Uploads package to storage.
+    /// </summary>
     [HttpPost("packages")]
     [DisableFormValueModelBinding]
     [RequestSizeLimit(MaxPackageSizeBytes)]
@@ -234,11 +245,14 @@ public sealed class AdminController : ControllerBase
         return null;
     }
 
+    /// <summary>
+    /// Creates temporary random package.
+    /// </summary>
+    /// <param name="packageParameters">Random package parameters.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Created package info.</returns>
     [HttpPost("random")]
     public Task<Contract.Models.Package> PostRandomAsync(
         RandomPackageParameters packageParameters,
-        CancellationToken cancellationToken = default)
-    {
-        return _packagesApi.GetRandomPackageAsync(packageParameters, cancellationToken);
-    }
+        CancellationToken cancellationToken = default) => _packagesApi.GetRandomPackageAsync(packageParameters, cancellationToken);
 }

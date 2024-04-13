@@ -4,6 +4,7 @@ using FluentMigrator.Runner;
 using FluentMigrator.Runner.Conventions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using Serilog;
@@ -17,6 +18,7 @@ using SIStorage.Service.Metrics;
 using SIStorage.Service.Middlewares;
 using SIStorage.Service.Services;
 using System.Data.Common;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +42,14 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.Configure<SIStorageOptions>(configuration.GetSection(SIStorageOptions.ConfigurationSectionName));
 
     services.AddControllers();
+    
+    services.AddSwaggerGen(options =>
+    {
+        options.SwaggerDoc("v1", new OpenApiInfo { Title = "SIStorage service", Version = "v1" });
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        options.IncludeXmlComments(xmlPath);
+    });
 
     ConfigureAutoMapper(services);
 
@@ -85,6 +95,12 @@ static void Configure(WebApplication app)
     var options = app.Services.GetRequiredService<IOptions<SIStorageOptions>>().Value;
 
     app.UseMiddleware<ErrorHandlingMiddleware>();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
     if (options.ServeStaticFiles)
     {

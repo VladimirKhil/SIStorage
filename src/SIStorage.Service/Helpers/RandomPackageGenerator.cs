@@ -235,27 +235,6 @@ internal static class RandomPackageGenerator
                 }
             }
         }
-
-        foreach (var atom in question.Scenario)
-        {
-            if (atom.Type == AtomTypes.Text || atom.Type == AtomTypes.Oral)
-            {
-                continue;
-            }
-
-            var link = sourceDocument.GetLink(atom);
-
-            if (link.GetStream != null)
-            {
-                var collection = targetDocument.TryGetCollection(atom.Type);
-
-                if (collection != null)
-                {
-                    using var stream = link.GetStream().Stream;
-                    await collection.AddFileAsync(link.Uri, stream, cancellationToken);
-                }
-            }
-        }
     }
 
     private static void InheritAuthors(SIDocument sourceDocument, Round round, Theme theme)

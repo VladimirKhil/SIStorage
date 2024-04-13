@@ -7,7 +7,7 @@ namespace SIStorage.Service.MapperProfiles;
 /// <summary>
 /// Defines a SIStorage mapping profile.
 /// </summary>
-public sealed class SIStorageProfile : Profile
+internal sealed class SIStorageProfile : Profile
 {
     public const string OptionsKey = "options";
 

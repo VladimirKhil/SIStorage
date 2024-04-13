@@ -5,7 +5,7 @@ namespace SIStorage.Service.Metrics;
 /// <summary>
 /// Holds service metrics.
 /// </summary>
-public sealed class OtelMetrics
+internal sealed class OtelMetrics
 {
     public string MeterName { get; }
 
@@ -13,5 +13,7 @@ public sealed class OtelMetrics
     {
         var meter = new Meter(meterName);
         MeterName = meterName;
+
+        // TODO: implement custom service metrics
     }
 }

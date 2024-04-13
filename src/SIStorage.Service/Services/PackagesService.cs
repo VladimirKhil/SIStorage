@@ -20,7 +20,7 @@ using static LinqToDB.Sql;
 namespace SIStorage.Service.Services;
 
 /// <inheritdoc cref="IExtendedPackagesApi" />
-public sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
+internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
 {
     private const string PackagesFolder = "packages";
     private const int RandomPackageSourceCount = 10;

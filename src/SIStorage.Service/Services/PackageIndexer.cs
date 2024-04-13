@@ -5,7 +5,7 @@ using SIStorage.Service.Models;
 
 namespace SIStorage.Service.Services;
 
-public sealed class PackageIndexer : IPackageIndexer
+internal sealed class PackageIndexer : IPackageIndexer
 {
     public PackageInfo IndexPackage(SIDocument document)
     {

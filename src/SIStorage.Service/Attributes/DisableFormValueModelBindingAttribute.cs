@@ -7,7 +7,7 @@ namespace SIStorage.Service.Attributes;
 /// Disables form body value binding for a controller/action to allow working with file uploads directly.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class DisableFormValueModelBindingAttribute : Attribute, IResourceFilter
+internal sealed class DisableFormValueModelBindingAttribute : Attribute, IResourceFilter
 {
     public void OnResourceExecuting(ResourceExecutingContext context)
     {

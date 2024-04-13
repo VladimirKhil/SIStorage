@@ -19,6 +19,7 @@ public sealed class PackageInfo
 
     /// <summary>
     /// Package publisher.
+    /// </summary>
     public string? Publisher { get; set; }
 
     /// <summary>

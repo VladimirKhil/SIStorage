@@ -26,7 +26,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIStorage.Database", "src\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIStorage.Uploader", "src\SIStorage.Uploader\SIStorage.Uploader.csproj", "{69DC884F-AE28-4412-847D-D1AF538C1AE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIStorage.Service.ComponentTests", "test\SIStorage.Service.ComponentTests\SIStorage.Service.ComponentTests.csproj", "{4B67F59A-7E15-4B88-B7BB-1D164B789FB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIStorage.Service.ComponentTests", "test\SIStorage.Service.ComponentTests\SIStorage.Service.ComponentTests.csproj", "{4B67F59A-7E15-4B88-B7BB-1D164B789FB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

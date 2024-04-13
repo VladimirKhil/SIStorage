@@ -5,7 +5,7 @@ using SIStorage.Service.Helpers;
 
 namespace SIStorage.Service.Services;
 
-public sealed class TempPackagesService : ITempPackagesService
+internal sealed class TempPackagesService : ITempPackagesService
 {
     private const string TempFolder = "temp";
 

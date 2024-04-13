@@ -5,6 +5,9 @@
 /// </summary>
 public sealed class SIStorageOptions
 {
+    /// <summary>
+    /// Default configuration section name.
+    /// </summary>
     public const string ConfigurationSectionName = "SIStorage";
 
     /// <summary>
