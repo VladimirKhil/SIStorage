@@ -49,6 +49,9 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
         var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         options.IncludeXmlComments(xmlPath);
+        var xmlFileContract = $"{Assembly.GetExecutingAssembly().GetName().Name}.Contract.xml";
+        var xmlPathContract = Path.Combine(AppContext.BaseDirectory, xmlFileContract);
+        options.IncludeXmlComments(xmlPathContract);
     });
 
     ConfigureAutoMapper(services);
@@ -90,6 +93,7 @@ static void ConfigureMigrationRunner(IServiceCollection services, IConfiguration
                 .ScanIn(typeof(DbConstants).Assembly).For.Migrations())
         .AddLogging(lb => lb.AddFluentMigratorConsole());
 }
+
 static void Configure(WebApplication app)
 {
     var options = app.Services.GetRequiredService<IOptions<SIStorageOptions>>().Value;

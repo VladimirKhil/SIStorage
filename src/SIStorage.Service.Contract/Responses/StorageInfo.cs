@@ -3,10 +3,6 @@
 /// <summary>
 /// Defines storage information.
 /// </summary>
-public sealed class StorageInfo
-{
-    /// <summary>
-    /// Are random packages supported.
-    /// </summary>
-    public bool RandomPackagesSupported { get; set; }
-}
+/// <param name="RandomPackagesSupported">Are random packages supported.</param>
+/// <param name="IdentifiersSupported">Are integer identifiers supported.</param>
+public sealed record StorageInfo(bool RandomPackagesSupported, bool IdentifiersSupported);

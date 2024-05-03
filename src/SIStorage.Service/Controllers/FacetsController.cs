@@ -37,6 +37,7 @@ public sealed class FacetsController : ControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Packages authors</returns>
     [HttpGet("authors")]
+    [ProducesResponseType(typeof(Author[]), StatusCodes.Status200OK)]
     public Task<Author[]> GetAuthorsAsync(int? languageId = null, CancellationToken cancellationToken = default) =>
         _facetsApi.GetAuthorsAsync(languageId, cancellationToken);
     
