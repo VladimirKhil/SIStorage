@@ -92,7 +92,11 @@ internal static class RandomPackageGenerator
                     packageComments,
                     cancellationToken))
                 {
-                    j--;
+                    if (retryCounter-- >= 0)
+                    {
+                        j--;
+                    }
+
                     continue;
                 }
             }
@@ -224,14 +228,14 @@ internal static class RandomPackageGenerator
 
             var mediaInfo = sourceDocument.TryGetMedia(contentItem);
 
-            if (mediaInfo.HasValue && mediaInfo.Value.HasStream && mediaInfo.Value.Uri != null)
+            if (mediaInfo.HasValue && mediaInfo.Value.HasStream)
             {
                 var collection = targetDocument.TryGetCollection(contentItem.Type);
 
                 if (collection != null)
                 {
                     using var stream = mediaInfo.Value.Stream!;
-                    await collection.AddFileAsync(mediaInfo.Value.Uri.AbsoluteUri, stream, cancellationToken);
+                    await collection.AddFileAsync(contentItem.Value, stream, cancellationToken);
                 }
             }
         }

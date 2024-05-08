@@ -453,7 +453,7 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
     public async Task<Package> GetRandomPackageAsync(RandomPackageParameters randomPackageParameters, CancellationToken cancellationToken = default)
     {
         IQueryable<PackageModel> packages = _connection.Packages;
-        
+
         packages = BuildTagFilter(randomPackageParameters.TagIds, packages);
         packages = BuildRestrictionFilter(randomPackageParameters.RestrictionIds, packages);
         packages = BuildDifficultyFilter(randomPackageParameters.Difficulty, packages);
