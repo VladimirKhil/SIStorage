@@ -17,7 +17,7 @@ internal sealed class SIStorageClientFactory : ISIStorageClientFactory
 
         if (serviceUri != null)
         {
-            httpClient.BaseAddress = serviceUri;
+            httpClient.BaseAddress = new Uri(serviceUri, "api/v1/");
         }
 
         if (clientSecret != null)
