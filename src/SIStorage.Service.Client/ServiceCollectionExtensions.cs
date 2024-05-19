@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using Polly;
 using Polly.Extensions.Http;
 using SIStorage.Service.Contract;
@@ -46,7 +47,43 @@ public static class ServiceCollectionExtensions
                     options?.RetryCount ?? SIStorageClientOptions.DefaultRetryCount,
                     retryAttempt => TimeSpan.FromSeconds(Math.Pow(1.5, retryAttempt))));
 
+        services.AddSingleton<ISIStorageClientFactory, SIStorageClientFactory>();
+
         return services;
+    }
+
+    /// <summary>
+    /// Allows to create custom SIStorageService client.
+    /// </summary>
+    /// <remarks>
+    /// This method is intended to be used in desktop client app code only.
+    /// </remarks>
+    /// <param name="options">Client options.</param>
+    public static ISIStorageServiceClient CreateSIStorageServiceClient(SIStorageClientOptions options)
+    {
+        var cookieContainer = new CookieContainer();
+        HttpMessageHandler handler = new HttpClientHandler { CookieContainer = cookieContainer };
+
+        var policyHandler = new PolicyHttpMessageHandler(
+            HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .WaitAndRetryAsync(
+                    options.RetryCount,
+                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(1.5, retryAttempt))))
+        {
+            InnerHandler = handler
+        };
+
+        var client = new HttpClient(policyHandler)
+        {
+            BaseAddress = options.ServiceUri,
+            Timeout = options.Timeout,
+            DefaultRequestVersion = HttpVersion.Version20
+        };
+
+        SetAuthSecret(options, client);
+
+        return new SIStorageServiceClient(client);
     }
 
     private static void SetAuthSecret(SIStorageClientOptions options, HttpClient client)

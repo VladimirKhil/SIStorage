@@ -3,13 +3,16 @@
 /// <summary>
 /// Provides options for <see cref="SIStorageServiceClient" /> class.
 /// </summary>
-internal sealed class SIStorageClientOptions
+public sealed class SIStorageClientOptions
 {
     /// <summary>
     /// Name of the configuration section holding these options.
     /// </summary>
     public const string ConfigurationSectionName = "SIStorageServiceClient";
 
+    /// <summary>
+    /// Default retry count value.
+    /// </summary>
     public const int DefaultRetryCount = 3;
 
     /// <summary>
