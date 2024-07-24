@@ -9,15 +9,16 @@ public sealed class FacetsApiTests : TestsBase
     {
         var tags = await FacetsApi.GetTagsAsync();
 
-        CollectionAssert.AreEquivalent(
+        Assert.That(
+            tags,
+            Is.EquivalentTo(
             new[]
             {
                 new Tag(1, "tag1"),
                 new Tag(2, "tag2"),
                 new Tag(3, "tag3"),
                 new Tag(4, "tag4"),
-            },
-            tags);
+            }));
     }
 
     [Test]
@@ -25,14 +26,15 @@ public sealed class FacetsApiTests : TestsBase
     {
         var tags = await FacetsApi.GetTagsAsync(CommonLanguageId);
 
-        CollectionAssert.AreEquivalent(
+        Assert.That(
+            tags,
+            Is.EquivalentTo(
             new[]
             {
                 new Tag(1, "tag1"),
                 new Tag(2, "tag2"),
                 new Tag(3, "tag3"),
-            },
-            tags);
+            }));
     }
 
     [Test]
@@ -40,14 +42,15 @@ public sealed class FacetsApiTests : TestsBase
     {
         var publishers = await FacetsApi.GetPublishersAsync();
 
-        CollectionAssert.AreEquivalent(
+        Assert.That(
+            publishers,
+            Is.EquivalentTo(
             new[]
             {
                 new Publisher(1, "publisher1"),
                 new Publisher(2, "publisher2"),
                 new Publisher(3, "publisher3"),
-            },
-            publishers);
+            }));
     }
 
     [Test]
@@ -55,13 +58,14 @@ public sealed class FacetsApiTests : TestsBase
     {
         var publishers = await FacetsApi.GetPublishersAsync(CommonLanguageId);
 
-        CollectionAssert.AreEquivalent(
+        Assert.That(
+            publishers,
+            Is.EquivalentTo(
             new[]
             {
                 new Publisher(1, "publisher1"),
                 new Publisher(2, "publisher2"),
-            },
-            publishers);
+            }));
     }
 
     [Test]
@@ -69,14 +73,15 @@ public sealed class FacetsApiTests : TestsBase
     {
         var authors = await FacetsApi.GetAuthorsAsync();
 
-        CollectionAssert.AreEquivalent(
+        Assert.That(
+            authors,
+            Is.EquivalentTo(
             new[]
             {
                 new Author(1, "author1"),
                 new Author(2, "author2"),
                 new Author(3, "author3"),
-            },
-            authors);
+            }));
     }
 
     [Test]
@@ -84,13 +89,14 @@ public sealed class FacetsApiTests : TestsBase
     {
         var authors = await FacetsApi.GetAuthorsAsync(CommonLanguageId);
 
-        CollectionAssert.AreEquivalent(
+        Assert.That(
+            authors,
+            Is.EquivalentTo(
             new[]
             {
                 new Author(1, "author1"),
                 new Author(2, "author2"),
-            },
-            authors);
+            }));
     }
 
     [Test]
@@ -98,26 +104,28 @@ public sealed class FacetsApiTests : TestsBase
     {
         var languages = await FacetsApi.GetLanguagesAsync();
 
-        CollectionAssert.AreEquivalent(
+        Assert.That(
+            languages,
+            Is.EquivalentTo(
             new[]
             {
                 new Language(1, "language1"),
                 new Language(2, "language2"),
-            },
-            languages);
+            }));
     }
 
     [Test]
     public async Task GetRestriction_Ok()
     {
         var restrictions = await FacetsApi.GetRestrictionsAsync();
-
-        CollectionAssert.AreEquivalent(
+        
+        Assert.That(
+            restrictions,
+            Is.EquivalentTo(
             new[]
             {
                 new Restriction(1, "Age", "12+"),
                 new Restriction(2, "Age", "18+"),
-            },
-            restrictions);
+            }));
     }
 }

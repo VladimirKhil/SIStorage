@@ -10,7 +10,7 @@ internal sealed class RandomPackagesTests : TestsBase
     {
         var package = await PackagesApi.GetRandomPackageAsync(new RandomPackageParameters
         {
-            RestrictionIds = new int[] { -1 }
+            RestrictionIds = [-1]
         });
 
         Assert.That(package, Is.Not.Null);

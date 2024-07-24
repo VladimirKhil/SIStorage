@@ -50,7 +50,7 @@ internal static class RandomPackageGenerator
         {
             for (var i = 0; i < parameters.RoundCount; i++)
             {
-                doc.Package.Rounds.Add(new Round { Type = RoundTypes.Standart, Name = RoundIndicator + (i + 1) });
+                doc.Package.Rounds.Add(new Round { Type = RoundTypes.Standart, Name = (i + 1).ToString() });
 
                 for (var j = 0; j < parameters.CommonThemeCount; j++)
                 {
@@ -76,7 +76,7 @@ internal static class RandomPackageGenerator
                 }
             }
 
-            doc.Package.Rounds.Add(new Round { Type = RoundTypes.Final, Name = RoundIndicator + (parameters.RoundCount + 1) });
+            doc.Package.Rounds.Add(new Round { Type = RoundTypes.Final, Name = (parameters.RoundCount + 1) });
 
             for (var j = 0; j < parameters.FinalThemeCount; j++)
             {

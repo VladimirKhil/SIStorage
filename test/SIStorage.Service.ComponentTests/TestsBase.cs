@@ -175,6 +175,9 @@ public abstract class TestsBase
         DbConnection.PackageAuthors.Insert(() => new PackageAuthor { PackageId = Package5Id, AuthorId = author3Id });
     }
 
+    [OneTimeTearDown]
+    public void Cleanup() => DbConnection.Dispose();
+
     private void ResetSequence(string sequenceName) => DbConnection.Execute(
         $"""
         do $$

@@ -2,8 +2,10 @@
 using LinqToDB.AspNet;
 using LinqToDB.AspNet.Logging;
 using LinqToDB.Data.RetryPolicy;
+using LinqToDB.DataProvider.PostgreSQL;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using SIStorage.Database.Models;
 
 namespace SIStorage.Database;
@@ -21,11 +23,18 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration,
         string connectionStringName = "SIStorage")
     {
-        var dbConnectionString = configuration.GetConnectionString(connectionStringName);
+        var dbConnectionString = configuration.GetConnectionString(connectionStringName)
+            ?? throw new InvalidOperationException("Database connection is undefined");
+
+        var builder = new NpgsqlDataSourceBuilder(dbConnectionString);
+        builder.EnableDynamicJson();
+        
+        var dataSource = builder.Build();
+        var dataProvider = PostgreSQLTools.GetDataProvider(connectionString: dbConnectionString);
 
         services.AddLinqToDBContext<SIStorageDbConnection>((provider, options) =>
             options
-                .UsePostgreSQL(dbConnectionString)
+                .UseConnectionFactory(dataProvider, _ => dataSource.CreateConnection())
                 .UseRetryPolicy(new TransientRetryPolicy())
                 .UseDefaultLogging(provider));
 

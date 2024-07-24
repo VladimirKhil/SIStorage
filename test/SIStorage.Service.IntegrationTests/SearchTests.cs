@@ -227,14 +227,14 @@ internal sealed class SearchTests : TestsBase
     {
         var page = await PackagesApi.GetPackagesAsync(filter, selectionParameters);
 
-        if (page.Packages.Any())
+        if (page.Packages.Length != 0)
         {
             Assert.Multiple(() =>
             {
-                Assert.IsTrue(page.Packages.All(packageValidator), "Validator is wrong");
-                Assert.Less(0, page.Total);
+                Assert.That(page.Packages.All(packageValidator), Is.True, "Validator is wrong");
+                Assert.That(page.Total, Is.GreaterThan(0));
 
-                Assert.GreaterOrEqual(selectionParameters.Count, page.Packages.Length);
+                Assert.That(selectionParameters.Count, Is.GreaterThanOrEqualTo(page.Packages.Length));
 
                 if (page.Packages.Length > 1)
                 {
@@ -244,7 +244,7 @@ internal sealed class SearchTests : TestsBase
         }
         else
         {
-            Assert.AreEqual(0, page.Total);
+            Assert.That(page.Total, Is.EqualTo(0));
         }
     }
 
@@ -267,11 +267,11 @@ internal sealed class SearchTests : TestsBase
 
                 if (selectionParameters.SortDirection == PackageSortDirection.Ascending)
                 {
-                    Assert.LessOrEqual(currentDate, packageDate.Value);
+                    Assert.That(packageDate.Value, Is.GreaterThanOrEqualTo(currentDate));
                 }
                 else
                 {
-                    Assert.GreaterOrEqual(currentDate, packageDate.Value);
+                    Assert.That(packageDate.Value, Is.LessThanOrEqualTo(currentDate));
                 }
 
                 currentDate = packageDate.Value;
@@ -295,11 +295,11 @@ internal sealed class SearchTests : TestsBase
 
                 if (selectionParameters.SortDirection == PackageSortDirection.Ascending)
                 {
-                    Assert.True(currentName.CompareTo(packageName) <= 0, "Wrong ascending sorting");
+                    Assert.That(currentName.CompareTo(packageName), Is.LessThanOrEqualTo(0), "Wrong ascending sorting");
                 }
                 else
                 {
-                    Assert.True(currentName.CompareTo(packageName) >= 0, "Wrong descending sorting");
+                    Assert.That(currentName.CompareTo(packageName), Is.GreaterThanOrEqualTo(0), "Wrong descending sorting");
                 }
 
                 currentName = packageName;

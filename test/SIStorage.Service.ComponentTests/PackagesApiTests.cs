@@ -26,7 +26,7 @@ public sealed class PackagesApiTests : TestsBase
             Assert.That(package.LogoUri?.ToString(), Is.EqualTo(expectedPackage.LogoUri));
             Assert.That(package.PublisherId, Is.EqualTo(expectedPackage.PublisherId));
             Assert.That(package.Rounds[0].Name, Is.EqualTo(expectedPackage.Rounds[0]!.Name));
-            CollectionAssert.AreEqual(expectedPackage.Rounds[0].ThemeNames, package.Rounds[0].ThemeNames);
+            Assert.That(expectedPackage.Rounds[0].ThemeNames, Is.EqualTo(package.Rounds[0].ThemeNames));
         });
     }
 

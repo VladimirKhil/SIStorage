@@ -7,7 +7,7 @@ namespace SIStorage.Database;
 /// <summary>
 /// Defines a database context.
 /// </summary>
-public sealed class SIStorageDbConnection : DataConnection
+public sealed class SIStorageDbConnection(DataOptions options) : DataConnection(options)
 {
     /// <summary>
     /// Package authors.
@@ -53,6 +53,4 @@ public sealed class SIStorageDbConnection : DataConnection
     /// Package - restriction relation.
     /// </summary>
     public ITable<PackageRestriction> PackageRestrictions => this.GetTable<PackageRestriction>();
-
-    public SIStorageDbConnection(DataOptions options) : base(options) { }
 }

@@ -251,6 +251,7 @@ public sealed class AdminController : ControllerBase
     /// <param name="packageParameters">Random package parameters.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Created package info.</returns>
+    /// <remarks>This method is not affected by rate limiter.</remarks>
     [HttpPost("random")]
     public Task<Contract.Models.Package> PostRandomAsync(
         RandomPackageParameters packageParameters,
