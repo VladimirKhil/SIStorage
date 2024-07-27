@@ -19,39 +19,27 @@ namespace SIStorage.Service.Controllers;
 /// <summary>
 /// Provides admin-level API for uploading packages.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of <see cref="PackagesController" />.
+/// </remarks>
+/// <param name="packageIndexer">Package indexer.</param>
+/// <param name="packagesApi">Packages API.</param>
+/// <param name="options">Service options.</param>
+/// <param name="logger">Service logger.</param>
 [Route("api/v1/admin")]
 [ApiController]
 [Produces("application/json")]
-public sealed class AdminController : ControllerBase
+public sealed class AdminController(
+    IPackageIndexer packageIndexer,
+    IExtendedPackagesApi packagesApi,
+    IOptions<SIStorageOptions> options,
+    ILogger<AdminController> logger) : ControllerBase
 {
     private static readonly FormOptions DefaultFormOptions = new();
     private const long MaxPackageSizeBytes = 105_000_000;
     private const string PackagesFolder = "packages";
     private const string LogoFolder = "logo";
-
-    private readonly IPackageIndexer _packageIndexer;
-    private readonly IExtendedPackagesApi _packagesApi;
-    private readonly SIStorageOptions _options;
-    private readonly ILogger<AdminController> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="PackagesController" />.
-    /// </summary>
-    /// <param name="packageIndexer">Package indexer.</param>
-    /// <param name="packagesApi">Packages API.</param>
-    /// <param name="options">Service options.</param>
-    /// <param name="logger">Service logger.</param>
-    public AdminController(
-        IPackageIndexer packageIndexer,
-        IExtendedPackagesApi packagesApi,
-        IOptions<SIStorageOptions> options,
-        ILogger<AdminController> logger)
-    {
-        _packageIndexer = packageIndexer;
-        _packagesApi = packagesApi;
-        _options = options.Value;
-        _logger = logger;
-    }
+    private readonly SIStorageOptions _options = options.Value;
 
     /// <summary>
     /// Uploads package to storage.
@@ -171,11 +159,11 @@ public sealed class AdminController : ControllerBase
                 }
 
                 packageFileName = Path.ChangeExtension(packageId.ToString(), "siq");
-                var packageMetadata = _packageIndexer.IndexPackage(document);
+                var packageMetadata = packageIndexer.IndexPackage(document);
                 var packageLogo = document.Package.LogoItem;
                 var logoUri = await GetLogoUriAsync(document, packageLogo, packageId, cancellationToken);
 
-                await _packagesApi.AddPackageAsync(packageId, packageName, packageMetadata, packageFileName, fileLength, logoUri, cancellationToken);
+                await packagesApi.AddPackageAsync(packageId, packageName, packageMetadata, packageFileName, fileLength, logoUri, cancellationToken);
             }
 
             var packagesFolder = Path.Combine(StringHelper.BuildRootedPath(_options.ContentFolder), PackagesFolder);
@@ -196,7 +184,7 @@ public sealed class AdminController : ControllerBase
                 }
                 catch (Exception exc)
                 {
-                    _logger.LogWarning(exc, "File delete error: {error}", exc.Message);
+                    logger.LogWarning(exc, "File delete error: {error}", exc.Message);
                 }
             }
         }
@@ -255,5 +243,5 @@ public sealed class AdminController : ControllerBase
     [HttpPost("random")]
     public Task<Contract.Models.Package> PostRandomAsync(
         RandomPackageParameters packageParameters,
-        CancellationToken cancellationToken = default) => _packagesApi.GetRandomPackageAsync(packageParameters, cancellationToken);
+        CancellationToken cancellationToken = default) => packagesApi.GetRandomPackageAsync(packageParameters, cancellationToken);
 }

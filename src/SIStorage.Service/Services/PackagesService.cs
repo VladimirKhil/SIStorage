@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using LinqToDB;
+﻿using LinqToDB;
 using LinqToDB.Common;
 using Microsoft.Extensions.Options;
 using SIStorage.Database;
@@ -20,35 +19,20 @@ using static LinqToDB.Sql;
 namespace SIStorage.Service.Services;
 
 /// <inheritdoc cref="IExtendedPackagesApi" />
-internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
+internal sealed class PackagesService(
+    ITempPackagesService tempPackagesService,
+    SIStorageDbConnection connection,
+    IOptions<SIStorageOptions> options,
+    ILogger<PackagesService> logger) : IExtendedPackagesApi, IPackagesProvider
 {
     private const string PackagesFolder = "packages";
     private const int RandomPackageSourceCount = 10;
     private static readonly PackageGeneratorParameters _generatorParameters = new(3, 6, 7, 100);
-
-    private readonly ITempPackagesService _tempPackagesService;
-    private readonly SIStorageDbConnection _connection;
-    private readonly SIStorageOptions _options;
-    private readonly IMapper _mapper;
-    private readonly ILogger<PackagesService> _logger;
-
-    public PackagesService(
-        ITempPackagesService tempPackagesService,
-        SIStorageDbConnection connection,
-        IOptions<SIStorageOptions> options,
-        IMapper mapper,
-        ILogger<PackagesService> logger)
-    {
-        _tempPackagesService = tempPackagesService;
-        _connection = connection;
-        _options = options.Value;
-        _mapper = mapper;
-        _logger = logger;
-    }
+    private readonly SIStorageOptions _options = options.Value;
 
     public async Task<Package> GetPackageAsync(Guid packageId, CancellationToken cancellationToken = default)
     {
-        var query = EnrichPackageQuery(_connection.Packages.Where(p => p.Id == packageId));
+        var query = EnrichPackageQuery(connection.Packages.Where(p => p.Id == packageId));
         var package = await query.FirstOrDefaultAsync(cancellationToken) ?? throw new ServiceException(WellKnownSIStorageServiceErrorCode.PackageNotFound, HttpStatusCode.NotFound);
 
         return ToPackage(package);
@@ -58,14 +42,14 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
     {
         try
         {
-            await _connection.Packages
+            await connection.Packages
                 .Where(p => p.Id == packageId)
                 .Set(p => p.DownloadCount, p => p.DownloadCount + 1)
                 .UpdateAsync(cancellationToken);
         }
         catch (Exception exc)
         {
-            _logger.LogWarning(exc, "Error while incrementing download counter for package {packageId}: {message}", packageId, exc.Message);
+            logger.LogWarning(exc, "Error while incrementing download counter for package {packageId}: {message}", packageId, exc.Message);
         }
     }
 
@@ -74,7 +58,7 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
         PackageSelectionParameters packageSelectionParameters,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<PackageModel> packages = _connection.Packages;
+        IQueryable<PackageModel> packages = connection.Packages;
         packages = BuildTagFilter(packageFilters.TagIds, packages);
 
         if (packageFilters.Difficulty != null)
@@ -87,7 +71,7 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
         if (packageFilters.AuthorId != null)
         {
             packages = packages.Where(
-                p => _connection.PackageAuthors.Any(
+                p => connection.PackageAuthors.Any(
                     pa => pa.PackageId == p.Id && packageFilters.AuthorId == pa.AuthorId));
         }
 
@@ -181,11 +165,11 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
 
         if (restrictionIds.Length == 1 && restrictionIds[0] == -1)
         {
-            return packages.Where(p => !_connection.PackageRestrictions.Any(pr => pr.PackageId == p.Id));
+            return packages.Where(p => !connection.PackageRestrictions.Any(pr => pr.PackageId == p.Id));
         }
 
         return packages.Where(
-            p => _connection.PackageRestrictions.Any(
+            p => connection.PackageRestrictions.Any(
                 pr => pr.PackageId == p.Id && restrictionIds.Contains(pr.RestrictionId)));
     }
 
@@ -198,11 +182,11 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
 
         if (tagIds.Length == 1 && tagIds[0] == -1)
         {
-            return packages.Where(p => !_connection.PackageTags.Any(pt => pt.PackageId == p.Id));
+            return packages.Where(p => !connection.PackageTags.Any(pt => pt.PackageId == p.Id));
         }
 
         return packages.Where(
-            p => _connection.PackageTags.Any(
+            p => connection.PackageTags.Any(
                 pt => pt.PackageId == p.Id && tagIds.Contains(pt.TagId)));
     }
 
@@ -230,7 +214,7 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
             PublisherId = package.PublisherId,
             QuestionCount = package.QuestionCount,
             RestrictionIds = enriched.RestrictionIds,
-            Rounds = _mapper.Map<Round[]>(package.Rounds),
+            Rounds = package.Rounds.Select(r => r.ToRound()).ToArray(),
             Size = package.Size,
             TagIds = enriched.TagIds,
         };
@@ -241,9 +225,9 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
 
     private IQueryable<EnrichedPackage> EnrichPackageQuery(IQueryable<PackageModel> packages) =>
         from p in packages
-        join pt in _connection.PackageTags on p.Id equals pt.PackageId into tags
-        join pa in _connection.PackageAuthors on p.Id equals pa.PackageId into authors
-        join pr in _connection.PackageRestrictions on p.Id equals pr.PackageId into restrictions
+        join pt in connection.PackageTags on p.Id equals pt.PackageId into tags
+        join pa in connection.PackageAuthors on p.Id equals pa.PackageId into authors
+        join pr in connection.PackageRestrictions on p.Id equals pr.PackageId into restrictions
         select new EnrichedPackage(
             p,
             tags.DefaultIfEmpty().Select(t => t!.TagId).ToArray(),
@@ -300,7 +284,7 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
             ? null
             : await InsertPublisherAsync(packageMetadata.Publisher ?? "", cancellationToken);
 
-        await _connection.Packages.InsertAsync(
+        await connection.Packages.InsertAsync(
             () => new PackageModel
             {
                 Id = packageId,
@@ -325,7 +309,7 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
         {
             var authorId = await InsertAuthorAsync(author, cancellationToken);
 
-            await _connection.PackageAuthors.InsertAsync(() =>
+            await connection.PackageAuthors.InsertAsync(() =>
                 new PackageAuthor
                 {
                     PackageId = packageId,
@@ -338,7 +322,7 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
         {
             var tagId = await InsertTagAsync(tag, cancellationToken);
 
-            await _connection.PackageTags.InsertAsync(() =>
+            await connection.PackageTags.InsertAsync(() =>
                 new PackageTag
                 {
                     PackageId = packageId,
@@ -354,7 +338,7 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
 
         var restrictionId = await InsertRestrictionAsync(WellKnownRestrictionNames.Age, packageMetadata.Restriction, cancellationToken);
 
-        await _connection.PackageRestrictions.InsertAsync(() =>
+        await connection.PackageRestrictions.InsertAsync(() =>
             new PackageRestriction
             {
                 PackageId = packageId,
@@ -365,7 +349,7 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
 
     private async Task<int> InsertLanguageAsync(string languageCode, CancellationToken cancellationToken)
     {
-        await _connection.Languages.InsertOrUpdateAsync(
+        await connection.Languages.InsertOrUpdateAsync(
             () => new LanguageModel
             {
                 Code = languageCode
@@ -377,12 +361,12 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
             },
             cancellationToken);
 
-        return (await _connection.Languages.FirstAsync(a => a.Code == languageCode, token: cancellationToken)).Id;
+        return (await connection.Languages.FirstAsync(a => a.Code == languageCode, token: cancellationToken)).Id;
     }
 
     private async Task<int> InsertPublisherAsync(string publisherName, CancellationToken cancellationToken)
     {
-        await _connection.Publishers.InsertOrUpdateAsync(
+        await connection.Publishers.InsertOrUpdateAsync(
             () => new PublisherModel
             {
                 Name = publisherName
@@ -394,12 +378,12 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
             },
             cancellationToken);
 
-        return (await _connection.Publishers.FirstAsync(a => a.Name == publisherName, token: cancellationToken)).Id;
+        return (await connection.Publishers.FirstAsync(a => a.Name == publisherName, token: cancellationToken)).Id;
     }
 
     private async Task<int> InsertAuthorAsync(string authorName, CancellationToken cancellationToken)
     {
-        await _connection.Authors.InsertOrUpdateAsync(
+        await connection.Authors.InsertOrUpdateAsync(
             () => new AuthorModel
             {
                 Name = authorName
@@ -411,12 +395,12 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
             },
             cancellationToken);
 
-        return (await _connection.Authors.FirstAsync(a => a.Name == authorName, token: cancellationToken)).Id;
+        return (await connection.Authors.FirstAsync(a => a.Name == authorName, token: cancellationToken)).Id;
     }
 
     private async Task<int> InsertTagAsync(string tagName, CancellationToken cancellationToken)
     {
-        await _connection.Tags.InsertOrUpdateAsync(
+        await connection.Tags.InsertOrUpdateAsync(
             () => new TagModel
             {
                 Name = tagName
@@ -428,12 +412,12 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
             },
             cancellationToken);
 
-        return (await _connection.Tags.FirstAsync(t => t.Name == tagName, token: cancellationToken)).Id;
+        return (await connection.Tags.FirstAsync(t => t.Name == tagName, token: cancellationToken)).Id;
     }
 
     private async Task<int> InsertRestrictionAsync(string name, string value, CancellationToken cancellationToken)
     {
-        await _connection.Restrictions.InsertOrUpdateAsync(
+        await connection.Restrictions.InsertOrUpdateAsync(
             () => new RestrictionModel
             {
                 Name = name,
@@ -447,12 +431,12 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
             },
             cancellationToken);
 
-        return (await _connection.Restrictions.FirstAsync(r => r.Name == name && r.Value == value, token: cancellationToken)).Id;
+        return (await connection.Restrictions.FirstAsync(r => r.Name == name && r.Value == value, token: cancellationToken)).Id;
     }
 
     public async Task<Package> GetRandomPackageAsync(RandomPackageParameters randomPackageParameters, CancellationToken cancellationToken = default)
     {
-        IQueryable<PackageModel> packages = _connection.Packages;
+        IQueryable<PackageModel> packages = connection.Packages;
 
         packages = BuildTagFilter(randomPackageParameters.TagIds, packages);
         packages = BuildRestrictionFilter(randomPackageParameters.RestrictionIds, packages);
@@ -475,18 +459,18 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
 
         var tags = randomPackageParameters.TagIds.IsNullOrEmpty()
             ? Array.Empty<string>()
-            : await _connection.Tags.Where(t => randomPackageParameters.TagIds.Contains(t.Id)).Select(t => t.Name).ToArrayAsync(cancellationToken);
+            : await connection.Tags.Where(t => randomPackageParameters.TagIds.Contains(t.Id)).Select(t => t.Name).ToArrayAsync(cancellationToken);
 
         var restrictions = randomPackageParameters.RestrictionIds.IsNullOrEmpty()
             ? Array.Empty<string>()
-            : await _connection.Restrictions.Where(r => randomPackageParameters.RestrictionIds.Contains(r.Id)).Select(r => r.Value).ToArrayAsync(cancellationToken);
+            : await connection.Restrictions.Where(r => randomPackageParameters.RestrictionIds.Contains(r.Id)).Select(r => r.Value).ToArrayAsync(cancellationToken);
 
         var language = randomPackageParameters.LanguageId == null
             ? null
-            : await _connection.Languages.Where(l => l.Id == randomPackageParameters.LanguageId).Select(l => l.Code).FirstOrDefaultAsync(cancellationToken);
+            : await connection.Languages.Where(l => l.Id == randomPackageParameters.LanguageId).Select(l => l.Code).FirstOrDefaultAsync(cancellationToken);
 
         var packageId = Guid.NewGuid();
-        var filePath = _tempPackagesService.GenerateFilePath(packageId);
+        var filePath = tempPackagesService.GenerateFilePath(packageId);
         var fileName = Path.GetFileName(filePath);
 
         using (var fileStream = File.Create(filePath))
@@ -533,7 +517,7 @@ internal sealed class PackagesService : IExtendedPackagesApi, IPackagesProvider
 
         if (!File.Exists(packagesFile))
         {
-            _logger.LogWarning("Cannot find file {fileName}", packagesFile);
+            logger.LogWarning("Cannot find file {fileName}", packagesFile);
             throw new ServiceException(WellKnownSIStorageServiceErrorCode.PackageNotFound, HttpStatusCode.InternalServerError);
         }
 

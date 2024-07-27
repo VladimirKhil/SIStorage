@@ -7,12 +7,11 @@ namespace SIStorage.Service.Metrics;
 /// </summary>
 internal sealed class OtelMetrics
 {
-    public string MeterName { get; }
+    public const string MeterName = "SIStorage";
 
-    public OtelMetrics(string meterName = "SIStorage")
+    public OtelMetrics(IMeterFactory meterFactory)
     {
-        var meter = new Meter(meterName);
-        MeterName = meterName;
+        var meter = new Meter(MeterName);
 
         // TODO: implement custom service metrics
     }

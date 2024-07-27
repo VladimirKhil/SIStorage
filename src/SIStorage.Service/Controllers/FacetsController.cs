@@ -7,19 +7,15 @@ namespace SIStorage.Service.Controllers;
 /// <summary>
 /// Provide API for querying packages facets.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of <see cref="FacetsController" />.
+/// </remarks>
+/// <param name="facetsApi">Facets API.</param>
 [Route("api/v1/facets")]
 [ApiController]
 [Produces("application/json")]
-public sealed class FacetsController : ControllerBase
+public sealed class FacetsController(IFacetsApi facetsApi) : ControllerBase
 {
-    private readonly IFacetsApi _facetsApi;
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="FacetsController" />.
-    /// </summary>
-    /// <param name="facetsApi">Facets API.</param>
-    public FacetsController(IFacetsApi facetsApi) => _facetsApi = facetsApi;
-
     /// <summary>
     /// Gets packages publishers.
     /// </summary>
@@ -28,7 +24,7 @@ public sealed class FacetsController : ControllerBase
     /// <returns>Packages publishers</returns>
     [HttpGet("publishers")]
     public Task<Publisher[]> GetPublishersAsync(int? languageId = null, CancellationToken cancellationToken = default) =>
-        _facetsApi.GetPublishersAsync(languageId, cancellationToken);
+        facetsApi.GetPublishersAsync(languageId, cancellationToken);
 
     /// <summary>
     /// Gets packages authors.
@@ -39,7 +35,7 @@ public sealed class FacetsController : ControllerBase
     [HttpGet("authors")]
     [ProducesResponseType(typeof(Author[]), StatusCodes.Status200OK)]
     public Task<Author[]> GetAuthorsAsync(int? languageId = null, CancellationToken cancellationToken = default) =>
-        _facetsApi.GetAuthorsAsync(languageId, cancellationToken);
+        facetsApi.GetAuthorsAsync(languageId, cancellationToken);
     
     /// <summary>
     /// Gets packages tags.
@@ -49,7 +45,7 @@ public sealed class FacetsController : ControllerBase
     /// <returns>Packages tags</returns>
     [HttpGet("tags")]
     public Task<Tag[]> GetTagsAsync(int? languageId = null, CancellationToken cancellationToken = default) =>
-        _facetsApi.GetTagsAsync(languageId, cancellationToken);
+        facetsApi.GetTagsAsync(languageId, cancellationToken);
 
     /// <summary>
     /// Gets packages restrictions.
@@ -58,7 +54,7 @@ public sealed class FacetsController : ControllerBase
     /// <returns>Packages restrictions</returns>
     [HttpGet("restrictions")]
     public Task<Restriction[]> GetRestrictionsAsync(CancellationToken cancellationToken = default) =>
-        _facetsApi.GetRestrictionsAsync(cancellationToken);
+        facetsApi.GetRestrictionsAsync(cancellationToken);
 
     /// <summary>
     /// Gets supported languages.
@@ -67,5 +63,5 @@ public sealed class FacetsController : ControllerBase
     /// <returns>Supported languages.</returns>
     [HttpGet("languages")]
     public Task<Language[]> GetLanguagesAsync(CancellationToken cancellationToken = default) =>
-        _facetsApi.GetLanguagesAsync(cancellationToken);
+        facetsApi.GetLanguagesAsync(cancellationToken);
 }

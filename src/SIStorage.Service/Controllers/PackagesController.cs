@@ -9,19 +9,15 @@ namespace SIStorage.Service.Controllers;
 /// <summary>
 /// Provides API for working with packages.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of <see cref="PackagesController" />.
+/// </remarks>
+/// <param name="packagesApi">Packages API.</param>
 [Route("api/v1/packages")]
 [ApiController]
 [Produces("application/json")]
-public sealed class PackagesController : ControllerBase
+public sealed class PackagesController(IExtendedPackagesApi packagesApi) : ControllerBase
 {
-    private readonly IExtendedPackagesApi _packagesApi;
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="PackagesController" />.
-    /// </summary>
-    /// <param name="packagesApi">Packages API.</param>
-    public PackagesController(IExtendedPackagesApi packagesApi) => _packagesApi = packagesApi;
-
     /// <summary>
     /// Gets package by identifier.
     /// </summary>
@@ -30,7 +26,7 @@ public sealed class PackagesController : ControllerBase
     /// <returns>Package information.</returns>
     [HttpGet("{packageId}")]
     public Task<Package> GetAsync(Guid packageId, CancellationToken cancellationToken) =>
-        _packagesApi.GetPackageAsync(packageId, cancellationToken);
+        packagesApi.GetPackageAsync(packageId, cancellationToken);
 
     /// <remarks>
     /// This API is not included in client library. It is called implicitly when trying to download the package.
@@ -41,7 +37,7 @@ public sealed class PackagesController : ControllerBase
     [HttpGet("{packageId}/download")]
     public async Task<IActionResult> GetDownloadLinkAsync(Guid packageId, string callbackUri, CancellationToken cancellationToken)
     {
-        await _packagesApi.IncrementDownloadCountAsync(packageId, cancellationToken);
+        await packagesApi.IncrementDownloadCountAsync(packageId, cancellationToken);
 
         return Redirect(callbackUri);
     }
@@ -105,7 +101,7 @@ public sealed class PackagesController : ControllerBase
             Count = count
         };
 
-        return _packagesApi.GetPackagesAsync(packageFilters, packageSelectionParameters, cancellationToken);
+        return packagesApi.GetPackagesAsync(packageFilters, packageSelectionParameters, cancellationToken);
     }
 
     /// <summary>
@@ -150,5 +146,5 @@ public sealed class PackagesController : ControllerBase
     [HttpPost("random")]
     public Task<Package> PostRandomAsync(
         RandomPackageParameters packageParameters,
-        CancellationToken cancellationToken = default) => _packagesApi.GetRandomPackageAsync(packageParameters, cancellationToken);
+        CancellationToken cancellationToken = default) => packagesApi.GetRandomPackageAsync(packageParameters, cancellationToken);
 }

@@ -15,7 +15,7 @@ services:
   sistorage:
     image: vladimirkhil/sistorageservice:${SERVICE_TAG}
     ports:
-      - 5100:5000
+      - 5100:8080
     volumes:
       - ./log:/app/log
     environment:

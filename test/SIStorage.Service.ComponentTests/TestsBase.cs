@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using LinqToDB;
+﻿using LinqToDB;
 using LinqToDB.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +10,6 @@ using SIStorage.Service.Configuration;
 using SIStorage.Service.Contract;
 using SIStorage.Service.Contract.Common;
 using SIStorage.Service.Contracts;
-using SIStorage.Service.MapperProfiles;
 using SIStorage.Service.Services;
 using System.Linq.Expressions;
 
@@ -52,10 +50,7 @@ public abstract class TestsBase
         var configuration = builder.Build();
 
         var services = new ServiceCollection();
-        var mapperConfiguration = new MapperConfiguration(cfg => cfg.AddProfile<SIStorageProfile>());
-        var mapper = mapperConfiguration.CreateMapper();
 
-        services.AddSingleton(mapper);
         services.Configure<SIStorageOptions>(configuration.GetSection(SIStorageOptions.ConfigurationSectionName));
         services.AddSIStorageDatabase(configuration);
         services.AddSingleton<ILoggerFactory, NullLoggerFactory>();

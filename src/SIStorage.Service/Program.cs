@@ -1,5 +1,4 @@
 using AspNetCoreRateLimit;
-using AutoMapper;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Conventions;
 using Microsoft.Extensions.FileProviders;
@@ -11,16 +10,19 @@ using Serilog;
 using SIStorage.Database;
 using SIStorage.Service.Configuration;
 using SIStorage.Service.Contract;
+using SIStorage.Service.Contract.Models;
+using SIStorage.Service.Contract.Requests;
+using SIStorage.Service.Contract.Responses;
 using SIStorage.Service.Contracts;
 using SIStorage.Service.Helpers;
-using SIStorage.Service.MapperProfiles;
 using SIStorage.Service.Metrics;
 using SIStorage.Service.Middlewares;
 using SIStorage.Service.Services;
 using System.Data.Common;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Console(new Serilog.Formatting.Display.MessageTemplateTextFormatter(
@@ -43,7 +45,10 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 {
     services.Configure<SIStorageOptions>(configuration.GetSection(SIStorageOptions.ConfigurationSectionName));
 
-    services.AddControllers();
+    services.AddControllers().AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.TypeInfoResolverChain.Insert(0, SIStorageContext.Default);
+    });
     
     services.AddSwaggerGen(options =>
     {
@@ -55,8 +60,6 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
         var xmlPathContract = Path.Combine(AppContext.BaseDirectory, xmlFileContract);
         options.IncludeXmlComments(xmlPathContract);
     });
-
-    ConfigureAutoMapper(services);
 
     services.AddSIStorageDatabase(configuration);
     ConfigureMigrationRunner(services, configuration);
@@ -70,14 +73,6 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     AddRateLimits(services, configuration);
     AddMetrics(services);
-}
-
-static void ConfigureAutoMapper(IServiceCollection services)
-{
-    var mapperConfiguration = new MapperConfiguration(cfg => cfg.AddProfile<SIStorageProfile>());
-    var mapper = mapperConfiguration.CreateMapper();
-
-    services.AddSingleton(mapper);
 }
 
 static void ConfigureMigrationRunner(IServiceCollection services, IConfiguration configuration)
@@ -127,8 +122,6 @@ static void Configure(WebApplication app)
 
     CreateDatabase(app);
     ApplyMigrations(app);
-
-    app.UseOpenTelemetryPrometheusScrapingEndpoint();
 }
 
 static void AddRateLimits(IServiceCollection services, IConfiguration configuration)
@@ -142,18 +135,16 @@ static void AddRateLimits(IServiceCollection services, IConfiguration configurat
 
 static void AddMetrics(IServiceCollection services)
 {
-    var meters = new OtelMetrics();
+    services.AddSingleton<OtelMetrics>();
 
     services.AddOpenTelemetry().WithMetrics(builder =>
         builder
             .ConfigureResource(rb => rb.AddService("SIStorage"))
-            .AddMeter(meters.MeterName)
+            .AddMeter(OtelMetrics.MeterName)
             .AddAspNetCoreInstrumentation()
             .AddRuntimeInstrumentation()
             .AddProcessInstrumentation()
-            .AddPrometheusExporter());
-
-    services.AddSingleton(meters);
+            .AddOtlpExporter());
 }
 
 static void CreateDatabase(WebApplication app)
@@ -180,3 +171,15 @@ static void ApplyMigrations(WebApplication app)
         runner.MigrateUp();
     }
 }
+
+[JsonSerializable(typeof(Publisher[]))]
+[JsonSerializable(typeof(Author[]))]
+[JsonSerializable(typeof(Tag[]))]
+[JsonSerializable(typeof(Restriction[]))]
+[JsonSerializable(typeof(Language[]))]
+[JsonSerializable(typeof(Package))]
+[JsonSerializable(typeof(StorageInfo))]
+[JsonSerializable(typeof(PackagesPage))]
+[JsonSerializable(typeof(RandomPackageParameters))]
+[JsonSerializable(typeof(SIStorageServiceError))]
+internal partial class SIStorageContext : JsonSerializerContext { }

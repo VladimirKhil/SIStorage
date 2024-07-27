@@ -76,7 +76,7 @@ internal static class RandomPackageGenerator
                 }
             }
 
-            doc.Package.Rounds.Add(new Round { Type = RoundTypes.Final, Name = (parameters.RoundCount + 1) });
+            doc.Package.Rounds.Add(new Round { Type = RoundTypes.Final, Name = (parameters.RoundCount + 1).ToString() });
 
             for (var j = 0; j < parameters.FinalThemeCount; j++)
             {

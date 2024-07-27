@@ -3,6 +3,7 @@ using FluentMigrator.Builders.Create.Table;
 using LinqToDB.Mapping;
 using Npgsql;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 namespace SIStorage.Database;
 
@@ -48,9 +49,9 @@ public static class DatabaseExtensions
     /// </summary>
     /// <typeparam name="T">Object's property type.</typeparam>
     /// <exception cref="ArgumentException">Invalid value has been provided.</exception>
-    public static void InitJsonConversion<T>() =>
+    public static void InitJsonConversion<T>(JsonTypeInfo<T> jsonTypeInfo) =>
         MappingSchema.Default.SetConverter<string, T>(
-            value => JsonSerializer.Deserialize<T>(value)
+            value => JsonSerializer.Deserialize<T>(value, jsonTypeInfo)
             ?? throw new ArgumentException($"Invalid value {value} for deserialization to type {typeof(T)}"));
 
     internal static ICreateTableColumnOptionOrWithColumnSyntax AsJson(this IColumnTypeSyntax<ICreateTableColumnOptionOrWithColumnSyntax> builder) =>

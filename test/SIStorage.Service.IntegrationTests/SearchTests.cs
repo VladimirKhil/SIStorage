@@ -44,7 +44,7 @@ internal sealed class SearchTests : TestsBase
         var tagId = tags.First().Id;
 
         await TestSearchAsync(
-            new PackageFilters { TagIds = new[] { tagId } },
+            new PackageFilters { TagIds = [tagId] },
             p => p.TagIds.Contains(tagId),
             new PackageSelectionParameters
             {
@@ -59,7 +59,7 @@ internal sealed class SearchTests : TestsBase
     {
         var authors = await FacetsApi.GetAuthorsAsync();
 
-        if (!authors.Any())
+        if (authors.Length == 0)
         {
             Assert.Ignore("No authors found");
             return;
