@@ -29,22 +29,6 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-        - name: log
-          {{- if .Values.logPath }}
-          hostPath:
-            path: '{{- toYaml .Values.logPath }}'
-            type: Directory
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
-        - name: nginx-log
-          {{- if .Values.nginxLogPath }}
-          hostPath:
-            path: '{{- toYaml .Values.nginxLogPath }}'
-            type: Directory
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
         - name: nginx-configmap
           configMap:
             name: {{ include "sistorage.fullname" . }}-nginx-configmap
@@ -85,6 +69,10 @@ spec:
               value: '{{ .Values.options.tempUri }}'
             - name: SIStorage__ServeStaticFiles
               value: '{{ .Values.options.serveStaticFiles }}'
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: '{{ .Values.options.otel.uri }}'
+            - name: OTEL_METRIC_EXPORT_INTERVAL
+              value: '{{ .Values.options.otel.metric.exportInterval }}'
           volumeMounts:
           - name: shared-data
             mountPath: /opt

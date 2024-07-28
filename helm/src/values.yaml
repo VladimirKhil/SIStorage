@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: vladimirkhil/sistorageservice
   pullPolicy: IfNotPresent
-  tag: 1.1.0
+  tag: 1.2.0
   nginxTag: "alpine"
 
 nginxPrometheusExporter:
@@ -22,7 +22,7 @@ securityContext: {}
 service:
   type: ClusterIP
   port: 5000
-  targetPort: 5000
+  targetPort: 8080
   nginxPort: 80
   nginxTargetPort: 80
 
@@ -36,8 +36,6 @@ resources: {}
 nginxResources: {}
 
 volumePath: ''
-logPath: ''
-nginxLogPath: ''
 
 maxUploadSize: '101m'
 bodyBufferSize: '10m'
@@ -50,8 +48,12 @@ database:
   passwordValue: 'postgres-password'
 
 options:
- serveStaticFiles: false
- logLevel: Warning
- packageUri: ''
- logoUri: ''
- publicUri: ''
+  serveStaticFiles: false
+  logLevel: Warning
+  packageUri: ''
+  logoUri: ''
+  publicUri: ''
+  otel:
+    uri: 'http://localhost:4317'
+    metric:
+      exportInterval: 60000
