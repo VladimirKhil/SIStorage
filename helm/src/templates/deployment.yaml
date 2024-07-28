@@ -76,8 +76,6 @@ spec:
           volumeMounts:
           - name: shared-data
             mountPath: /opt
-          - name: log
-            mountPath: /app/logs
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: nginx
@@ -85,8 +83,6 @@ spec:
           volumeMounts:
           - name: shared-data
             mountPath: /usr/share/nginx/html
-          - name: nginx-log
-            mountPath: /var/log/nginx/
           - name: nginx-configmap
             mountPath: /etc/nginx/nginx.conf
             subPath: nginx.conf
