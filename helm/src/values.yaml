@@ -42,10 +42,17 @@ bodyBufferSize: '10m'
 
 database:
   host: ''
+  port: 5432
   name: 'sistorage'
   user: 'postgres'
   passwordKey: ''
   passwordValue: 'postgres-password'
+  backup:
+    enabled: false
+    schedule: '0 0 * * *' # Run every day at midnight
+    imageVersion: 15
+    securityContext: {}
+    volumePath: ''
 
 options:
   serveStaticFiles: false
