@@ -5,6 +5,7 @@ import PackageSelectionParameters from './models/PackageSelectionParameters';
 import PackageSortDirection from './models/PackageSortDirection';
 import PackageSortMode from './models/PackageSortMode';
 import PackagesPage from './models/PackagesPage';
+import PackageValueFilters from './models/PackageValueFilters';
 import RandomPackageParameters from './models/RandomPackageParameters';
 
 /** Provides API for working with packages. */
@@ -65,6 +66,48 @@ export default class PackagesApi {
 		const queryArgs = Object.entries(query).map(([key, value]) => `${key}=${value}`).join("&");
 
 		return getAsync<PackagesPage>(`${this.baseUri}?${queryArgs}`);
+	}
+
+	async getPackagesByValueFiltersAsync(packageFilters: PackageValueFilters, packageSelectionParameters: PackageSelectionParameters) {
+		const query: Record<string, string | number> = {};
+
+		if (packageFilters.tags) {
+			query["tags"] = encodeURIComponent(packageFilters.tags.join(","));
+		}
+
+		if (packageFilters.difficulty) {
+			query["difficulty"] = packageFilters.difficulty.value.toString();
+			query["difficultyCompareMode"] = packageFilters.difficulty.compareMode;
+		}
+
+		if (packageFilters.publisher) {
+			query["publisher"] = encodeURIComponent(packageFilters.publisher);
+		}
+
+		if (packageFilters.author) {
+			query["author"] = encodeURIComponent(packageFilters.author);
+		}
+
+		if (packageFilters.restrictions && packageFilters.restrictions.length > 0) {
+			query["restrictions"] = encodeURIComponent(packageFilters.restrictions.map(r => `${r.name}:${r.value}`).join(","));
+		}
+
+		if (packageFilters.language) {
+			query["language"] = packageFilters.language;
+		}
+
+		if (packageFilters.searchText) {
+			query["searchText"] = encodeURIComponent(packageFilters.searchText);
+		}
+
+		query["sortMode"] = packageSelectionParameters.sortMode ?? PackageSortMode.Name;
+		query["sortDirection"] = packageSelectionParameters.sortDirection ?? PackageSortDirection.Ascending;
+		query["from"] = (packageSelectionParameters.from ?? 0).toString();
+		query["count"] = (packageSelectionParameters.count ?? 20).toString();
+
+		const queryArgs = Object.entries(query).map(([key, value]) => `${key}=${value}`).join("&");
+
+		return getAsync<PackagesPage>(`${this.baseUri}search?${queryArgs}`);
 	}
 
 	/** Gets random package. */

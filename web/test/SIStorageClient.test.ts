@@ -71,3 +71,11 @@ test('Get random package', async () => {
 	expect(packageInfo.restrictionIds).toStrictEqual([-1]);
 	console.log(packageInfo.contentUri);
 });
+
+// test('Get packages by value filters', async () => {
+// 	const packages = await siStorageClient.packages.getPackagesByValueFiltersAsync({ tags: ['music'] }, { count: 5 });
+
+// 	expect(packages).not.toBeNull();
+// 	expect(packages.packages.length).toBe(5);
+// 	expect(packages.total).toBeGreaterThanOrEqual(5);
+// });
