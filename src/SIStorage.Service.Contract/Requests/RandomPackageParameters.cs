@@ -26,4 +26,24 @@ public sealed record RandomPackageParameters
     /// Package language.
     /// </summary>
     public int? LanguageId { get; set; }
+
+    /// <summary>
+    /// Round count.
+    /// </summary>
+    public int RoundCount { get; set; } = 3;
+
+    /// <summary>
+    /// Table round theme count.
+    /// </summary>
+    public int TableThemeCount { get; set; } = 6;
+
+    /// <summary>
+    /// Theme list round theme count.
+    /// </summary>
+    public int ThemeListThemeCount { get; set; } = 7;
+
+    /// <summary>
+    /// Base question price.
+    /// </summary>
+    public int BaseQuestionPrice { get; set; } = 100;
 }

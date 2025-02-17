@@ -15,4 +15,16 @@ export default interface RandomPackageParameters {
 
 	/** Package language. */
 	languageId?: number;
+
+	/** Round count. */
+	roundCount?: number;
+
+	/** Table round theme count. */
+	tableThemeCount?: number;
+
+	/** Theme list round theme count. */
+	themeListThemeCount?: number;
+
+	/** Base question price. */
+	baseQuestionPrice?: number;
 }

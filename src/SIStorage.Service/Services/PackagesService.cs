@@ -27,7 +27,6 @@ internal sealed class PackagesService(
 {
     private const string PackagesFolder = "packages";
     private const int RandomPackageSourceCount = 10;
-    private static readonly PackageGeneratorParameters _generatorParameters = new(3, 6, 7, 100);
     private readonly SIStorageOptions _options = options.Value;
 
     public async Task<Package> GetPackageAsync(Guid packageId, CancellationToken cancellationToken = default)
@@ -458,11 +457,11 @@ internal sealed class PackagesService(
         }
 
         var tags = randomPackageParameters.TagIds.IsNullOrEmpty()
-            ? Array.Empty<string>()
+            ? []
             : await connection.Tags.Where(t => randomPackageParameters.TagIds.Contains(t.Id)).Select(t => t.Name).ToArrayAsync(cancellationToken);
 
         var restrictions = randomPackageParameters.RestrictionIds.IsNullOrEmpty()
-            ? Array.Empty<string>()
+            ? []
             : await connection.Restrictions.Where(r => randomPackageParameters.RestrictionIds.Contains(r.Id)).Select(r => r.Value).ToArrayAsync(cancellationToken);
 
         var language = randomPackageParameters.LanguageId == null
@@ -473,8 +472,14 @@ internal sealed class PackagesService(
         var filePath = tempPackagesService.GenerateFilePath(packageId);
         var fileName = Path.GetFileName(filePath);
 
+        var generatorParameters = new PackageGeneratorParameters(
+            Math.Max(1, Math.Min(5, randomPackageParameters.RoundCount)),
+            Math.Max(1, Math.Min(10, randomPackageParameters.TableThemeCount)),
+            Math.Max(1, Math.Min(10, randomPackageParameters.ThemeListThemeCount)),
+            Math.Max(1, Math.Min(1000, randomPackageParameters.BaseQuestionPrice)));
+
         using (var fileStream = File.Create(filePath))
-        using (var document = await RandomPackageGenerator.GeneratePackageAsync(fileStream, this, sourcePackages, _generatorParameters, cancellationToken))
+        using (var document = await RandomPackageGenerator.GeneratePackageAsync(fileStream, this, sourcePackages, generatorParameters, cancellationToken))
         {
             document.Package.Tags.AddRange(tags);
             document.Package.Restriction = string.Join(", ", restrictions);
