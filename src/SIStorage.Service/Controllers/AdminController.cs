@@ -150,9 +150,10 @@ public sealed class AdminController(
             Guid packageId;
             string packageFileName;
 
-            using var documentStream = System.IO.File.OpenRead(targetFilePath);
-            using var document = SIDocument.Load(documentStream);
+            using (var documentStream = System.IO.File.OpenRead(targetFilePath))
             {
+                using var document = SIDocument.Load(documentStream);
+                
                 if (!Guid.TryParse(document.Package.ID, out packageId))
                 {
                     packageId = Guid.NewGuid();

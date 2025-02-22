@@ -1,5 +1,7 @@
 ﻿using FluentMigrator.Builders;
 using FluentMigrator.Builders.Create.Table;
+using LinqToDB;
+using LinqToDB.Data;
 using LinqToDB.Mapping;
 using Npgsql;
 using System.Text.Json;
@@ -45,14 +47,21 @@ public static class DatabaseExtensions
     }
 
     /// <summary>
-    /// Registers a converter required to deserialize a JSON column value into object's property of specified type.
+    /// Registers a converter required to deserialize a JSON column value into object's property of specified type and serialize it back.
     /// </summary>
     /// <typeparam name="T">Object's property type.</typeparam>
     /// <exception cref="ArgumentException">Invalid value has been provided.</exception>
     public static void InitJsonConversion<T>(JsonTypeInfo<T> jsonTypeInfo) =>
-        MappingSchema.Default.SetConverter<string, T>(
-            value => JsonSerializer.Deserialize<T>(value, jsonTypeInfo)
-            ?? throw new ArgumentException($"Invalid value {value} for deserialization to type {typeof(T)}"));
+        MappingSchema.Default
+            .SetConverter<string, T>(
+                value => JsonSerializer.Deserialize<T>(value, jsonTypeInfo)
+                ?? throw new ArgumentException($"Invalid value {value} for deserialization to type {typeof(T)}"),
+                LinqToDB.Common.ConversionType.FromDatabase)
+            .SetConverter<T, DataParameter>(
+                value =>
+                    new DataParameter("", JsonSerializer.Serialize(value, jsonTypeInfo), DataType.Json)
+                ?? throw new ArgumentException($"Invalid value {value} for serialization from type {typeof(T)}"),
+                LinqToDB.Common.ConversionType.ToDatabase);
 
     internal static ICreateTableColumnOptionOrWithColumnSyntax AsJson(this IColumnTypeSyntax<ICreateTableColumnOptionOrWithColumnSyntax> builder) =>
         builder.AsCustom("json");

@@ -27,6 +27,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Console(new Serilog.Formatting.Display.MessageTemplateTextFormatter(
         "[{Timestamp:yyyy/MM/dd HH:mm:ss} {Level}] {Message:lj} {Exception}{NewLine}"))
+    .WriteTo.OpenTelemetry(options => options.ResourceAttributes = new Dictionary<string, object>
+    {
+        ["service.name"] = "SIStorage"
+    })
     .ReadFrom.Configuration(ctx.Configuration)
     .Filter.ByExcluding(logEvent =>
         logEvent.Exception is BadHttpRequestException || logEvent.Exception is OperationCanceledException));
@@ -182,4 +186,5 @@ static void ApplyMigrations(WebApplication app)
 [JsonSerializable(typeof(PackagesPage))]
 [JsonSerializable(typeof(RandomPackageParameters))]
 [JsonSerializable(typeof(SIStorageServiceError))]
+[JsonSerializable(typeof(CreatePackageResponse))]
 internal partial class SIStorageContext : JsonSerializerContext { }

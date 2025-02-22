@@ -6,22 +6,18 @@ namespace SIStorage.Service.Middlewares;
 /// <summary>
 /// Handles exceptions and creates corresponsing service responses.
 /// </summary>
-internal sealed class ErrorHandlingMiddleware
+internal sealed class ErrorHandlingMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public ErrorHandlingMiddleware(RequestDelegate next) => _next = next;
-
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await _next(context);
+            await next(context);
         }
         catch (ServiceException exc)
         {
             context.Response.StatusCode = (int)exc.StatusCode;
-            await context.Response.WriteAsJsonAsync(new SIStorageServiceError { ErrorCode = exc.ErrorCode });
+            await context.Response.WriteAsJsonAsync(new SIStorageServiceError { ErrorCode = exc.ErrorCode }, SIStorageContext.Default.SIStorageServiceError);
         }
     }
 }

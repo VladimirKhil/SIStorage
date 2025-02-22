@@ -62,7 +62,7 @@ internal static class RandomPackageGenerator
                         allThemeNames,
                         parameters,
                         i,
-                        package => package.Rounds[..^1],
+                        package => package.Rounds.Length > 1 ? package.Rounds[..^1] : [],
                         packageComments,
                         cancellationToken))
                     {
@@ -88,7 +88,7 @@ internal static class RandomPackageGenerator
                     allThemeNames,
                     parameters,
                     parameters.RoundCount,
-                    package => package.Rounds[^1..],
+                    package => package.Rounds.Length > 0 ? package.Rounds[^1..] : [],
                     packageComments,
                     cancellationToken))
                 {
@@ -153,7 +153,18 @@ internal static class RandomPackageGenerator
             packageCache[package.Id] = document = await provider.GetPackageAsync(package.Id.ToString(), cancellationToken);
         }
 
+        if (roundIndex >= document.Package.Rounds.Count)
+        {
+            return false;
+        }
+
         var round = document.Package.Rounds[roundIndex];
+
+        if (themeIndex >= round.Themes.Count)
+        {
+            return false;
+        }
+
         var theme = round.Themes[themeIndex];
 
         InheritAuthors(document, round, theme);
