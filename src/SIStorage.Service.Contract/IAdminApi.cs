@@ -18,6 +18,12 @@ public interface IAdminApi
     Task<CreatePackageResponse> UploadPackageAsync(string packageName, Stream packageStream, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Reindexes storage.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task ReindexAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets random package.
     /// </summary>
     /// <param name="randomPackageParameters">Random package parameters.</param>
@@ -25,4 +31,11 @@ public interface IAdminApi
     Task<Package> GetRandomPackageAsync(
         RandomPackageParameters randomPackageParameters,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes package from storage.
+    /// </summary>
+    /// <param name="packageId">Package identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task DeletePackageAsync(Guid packageId, CancellationToken cancellationToken = default);
 }

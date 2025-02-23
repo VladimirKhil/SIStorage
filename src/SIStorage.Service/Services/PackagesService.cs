@@ -346,6 +346,89 @@ internal sealed class PackagesService(
             cancellationToken);
     }
 
+    public async Task UpdatePackageAsync(
+        Guid packageId,
+        string packageName,
+        PackageInfo packageMetadata,
+        string packageFileName,
+        long packageFileSize,
+        string? logoUri,
+        CancellationToken cancellationToken)
+    {
+        var languageId = await InsertLanguageAsync(packageMetadata.Language == "en-US" ? "en-US" : "ru-RU", cancellationToken);
+
+        int? publisherId = string.IsNullOrEmpty(packageMetadata.Publisher)
+            ? null
+            : await InsertPublisherAsync(packageMetadata.Publisher ?? "", cancellationToken);
+
+        await connection.Packages
+            .Where(p => p.Id == packageId)
+            .Set(p => p.ContentTypeStatistic, packageMetadata.ContentTypeStatistic)
+            .Set(p => p.FileName, packageFileName)
+            .Set(p => p.OriginalFileName, packageName)
+            .Set(p => p.CreateDate, packageMetadata.CreateDate)
+            .Set(p => p.Difficulty, packageMetadata.Difficulty)
+            .Set(p => p.LanguageId, languageId)
+            .Set(p => p.LogoUri, logoUri)
+            .Set(p => p.Name, packageMetadata.Name)
+            .Set(p => p.PublisherId, publisherId)
+            .Set(p => p.QuestionCount, packageMetadata.QuestionCount)
+            .Set(p => p.Rounds, packageMetadata.Rounds)
+            .Set(p => p.Size, packageFileSize)
+            .UpdateAsync(cancellationToken);
+
+        await connection.PackageAuthors
+            .Where(pa => pa.PackageId == packageId)
+            .DeleteAsync(cancellationToken);
+
+        foreach (var author in packageMetadata.Authors)
+        {
+            var authorId = await InsertAuthorAsync(author, cancellationToken);
+            
+            await connection.PackageAuthors.InsertAsync(() =>
+                new PackageAuthor
+                {
+                    PackageId = packageId,
+                    AuthorId = authorId
+                },
+                cancellationToken);
+        }
+
+        await connection.PackageTags
+            .Where(pt => pt.PackageId == packageId)
+            .DeleteAsync(cancellationToken);
+
+        foreach (var tag in packageMetadata.Tags)
+        {
+            var tagId = await InsertTagAsync(tag, cancellationToken);
+            
+            await connection.PackageTags.InsertAsync(() =>
+                new PackageTag
+                {
+                    PackageId = packageId,
+                    TagId = tagId
+                },
+                cancellationToken);
+        }
+
+        await connection.PackageRestrictions
+            .Where(pr => pr.PackageId == packageId)
+            .DeleteAsync(cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(packageMetadata.Restriction))
+        {
+            var restrictionId = await InsertRestrictionAsync(WellKnownRestrictionNames.Age, packageMetadata.Restriction, cancellationToken);
+            
+            await connection.PackageRestrictions.InsertAsync(() =>
+                new PackageRestriction
+                {
+                    PackageId = packageId,
+                    RestrictionId = restrictionId
+                },
+                cancellationToken);
+        }
+    }
+
     private async Task<int> InsertLanguageAsync(string languageCode, CancellationToken cancellationToken)
     {
         await connection.Languages.InsertOrUpdateAsync(
@@ -533,4 +616,25 @@ internal sealed class PackagesService(
 
     [Function("random", ServerSideOnly = true, CanBeNull = false, IsPure = false)]
     private static Guid Random() => Guid.NewGuid();
+
+    public async Task<bool> DeletePackageAsync(Guid packageId, CancellationToken cancellationToken)
+    {
+        await connection.PackageAuthors
+            .Where(pa => pa.PackageId == packageId)
+            .DeleteAsync(cancellationToken);
+
+        await connection.PackageTags
+            .Where(pt => pt.PackageId == packageId)
+            .DeleteAsync(cancellationToken);
+
+        await connection.PackageRestrictions
+            .Where(pr => pr.PackageId == packageId)
+            .DeleteAsync(cancellationToken);
+
+        var recordCount = await connection.Packages
+            .Where(p => p.Id == packageId)
+            .DeleteAsync(cancellationToken);
+
+        return recordCount > 0;
+    }
 }

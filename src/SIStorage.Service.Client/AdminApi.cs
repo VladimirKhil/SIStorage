@@ -60,6 +60,26 @@ internal sealed class AdminApi : IAdminApi
         }
     }
 
+    public async Task ReindexAsync(CancellationToken cancellationToken = default)
+    {
+        using var response = await _client.PostAsync("admin/reindex", null, cancellationToken);
+        
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException(await response.Content.ReadAsStringAsync(cancellationToken), null, response.StatusCode);
+        }
+    }
+
+    public async Task DeletePackageAsync(Guid packageId, CancellationToken cancellationToken = default)
+    {
+        using var response = await _client.DeleteAsync($"admin/packages/{packageId}", cancellationToken);
+       
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException(await response.Content.ReadAsStringAsync(cancellationToken), null, response.StatusCode);
+        }
+    }
+
     public async Task<Package> GetRandomPackageAsync(RandomPackageParameters randomPackageParameters, CancellationToken cancellationToken = default)
     {
         using var response = await _client.PostAsJsonAsync("packages/random", randomPackageParameters, cancellationToken: cancellationToken);

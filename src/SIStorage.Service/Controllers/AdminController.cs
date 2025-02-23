@@ -245,4 +245,76 @@ public sealed class AdminController(
     public Task<Contract.Models.Package> PostRandomAsync(
         RandomPackageParameters packageParameters,
         CancellationToken cancellationToken = default) => packagesApi.GetRandomPackageAsync(packageParameters, cancellationToken);
+
+    /// <summary>
+    /// Reindexes storage.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    [HttpPost("reindex")]
+    public async Task ReindexAsync(CancellationToken cancellationToken = default)
+    {
+        var packagesFolder = Path.Combine(StringHelper.BuildRootedPath(_options.ContentFolder), PackagesFolder);
+
+        if (!Directory.Exists(packagesFolder))
+        {
+            return;
+        }
+
+        foreach (var packageFile in Directory.EnumerateFiles(packagesFolder, "*.siq"))
+        {
+            var packageId = Guid.Parse(Path.GetFileNameWithoutExtension(packageFile));
+            var packageFileName = Path.GetFileName(packageFile);
+            using var documentStream = System.IO.File.OpenRead(packageFile);
+            using var document = SIDocument.Load(documentStream);
+            var packageMetadata = packageIndexer.IndexPackage(document);
+            var packageLogo = document.Package.LogoItem;
+            var logoUri = await GetLogoUriAsync(document, packageLogo, packageId, cancellationToken);
+            
+            await packagesApi.UpdatePackageAsync(packageId, document.Package.Name, packageMetadata, packageFileName, new FileInfo(packageFile).Length, logoUri, cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Deletes the package.
+    /// </summary>
+    /// <param name="packageId">Package identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns></returns>
+    [HttpDelete("packages/{packageId}")]
+    public async Task<IActionResult> DeletePackageAsync(Guid packageId, CancellationToken cancellationToken)
+    {
+        var package = await packagesApi.GetPackageAsync(packageId, cancellationToken);
+
+        if (!await packagesApi.DeletePackageAsync(packageId, cancellationToken))
+        {
+            return StatusCode(500);
+        }
+
+        var packageFile = Path.Combine(
+            StringHelper.BuildRootedPath(_options.ContentFolder),
+            PackagesFolder,
+            Path.ChangeExtension(packageId.ToString(), "siq"));
+
+        if (System.IO.File.Exists(packageFile))
+        {
+            System.IO.File.Delete(packageFile);
+        }
+
+        if (package.LogoUri != null)
+        {
+            DeleteLogo(Path.GetFileName(package.LogoUri.LocalPath));
+        }
+
+        return Accepted();
+    }
+
+    private void DeleteLogo(string logoFileName)
+    {
+        var logoFile = Path.Combine(StringHelper.BuildRootedPath(_options.ContentFolder), LogoFolder, logoFileName);
+        
+        if (System.IO.File.Exists(logoFile))
+        {
+            System.IO.File.Delete(logoFile);
+        }
+    }
 }
