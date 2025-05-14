@@ -1,6 +1,5 @@
 ﻿using SIPackages;
 using SIPackages.Core;
-using SIStorage.Database.Models;
 using SIStorage.Service.Contracts;
 using SIStorage.Service.Models;
 using System.Text;
@@ -16,11 +15,6 @@ internal static class RandomPackageGenerator
     /// Random data marker.
     /// </summary>
     public const string RandomIndicator = "@{random}";
-
-    /// <summary>
-    /// Round marker.
-    /// </summary>
-    public const string RoundIndicator = "@{round}";
 
     /// <summary>
     /// Generates a random package.
@@ -62,7 +56,7 @@ internal static class RandomPackageGenerator
                         allThemeNames,
                         parameters,
                         i,
-                        package => package.Rounds.Length > 1 ? package.Rounds[..^1] : [],
+                        package => Enumerable.Range(0, package.Rounds.Length - 1).ToArray(),
                         packageComments,
                         cancellationToken))
                     {
@@ -88,7 +82,7 @@ internal static class RandomPackageGenerator
                     allThemeNames,
                     parameters,
                     parameters.RoundCount,
-                    package => package.Rounds.Length > 0 ? package.Rounds[^1..] : [],
+                    package => package.Rounds.Length > 0 ? [package.Rounds.Length - 1] : [],
                     packageComments,
                     cancellationToken))
                 {
@@ -123,20 +117,20 @@ internal static class RandomPackageGenerator
         HashSet<string> allThemeNames,
         PackageGeneratorParameters parameters,
         int targetRoundIndex,
-        Func<PackageMetadata, RoundModel[]> roundSelector,
+        Func<PackageMetadata, int[]> roundIndiciesSelector,
         StringBuilder packageComments,
         CancellationToken cancellationToken = default)
     {
         var packageIndex = Random.Shared.Next(packages.Count);
         var package = packages[packageIndex];
-        var filteredRounds = roundSelector(package);
+        var filteredRoundIndicies = roundIndiciesSelector(package);
 
-        if (filteredRounds.Length == 0)
+        if (filteredRoundIndicies.Length == 0)
         {
             return false;
         }
 
-        var roundIndex = Random.Shared.Next(filteredRounds.Length);
+        var roundIndex = filteredRoundIndicies[Random.Shared.Next(filteredRoundIndicies.Length)];
         var roundMeta = package.Rounds[roundIndex];
         var themeIndex = Random.Shared.Next(roundMeta.ThemeNames.Length);
         var themeName = roundMeta.ThemeNames[themeIndex];
