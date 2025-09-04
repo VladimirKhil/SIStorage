@@ -1,4 +1,5 @@
 import { getAsync } from './helpers';
+import InternalError from './models/InternalError';
 import Package from './models/Package';
 import PackageFilters from './models/PackageFilters';
 import PackageSelectionParameters from './models/PackageSelectionParameters';
@@ -7,6 +8,8 @@ import PackageSortMode from './models/PackageSortMode';
 import PackagesPage from './models/PackagesPage';
 import PackageValueFilters from './models/PackageValueFilters';
 import RandomPackageParameters from './models/RandomPackageParameters';
+import SIStorageServiceError from './models/SIStorageServiceError';
+import WellKnownSIStorageServiceErrorCode from './models/WellKnownSIStorageServiceErrorCode';
 
 /** Provides API for working with packages. */
 export default class PackagesApi {
@@ -121,10 +124,24 @@ export default class PackagesApi {
 		});
 
 		if (!response.ok) {
-			throw new Error(`${response.status} ${await response.text()}`);
+			const errorBody = await response.text();
+			const errorCode = tryGetErrorCode(errorBody);
+
+			throw new SIStorageServiceError(errorBody, response.status, errorCode);
 		}
 
 		const packageJson = await response.json();
 		return packageJson as Package;
 	}
+}
+
+function tryGetErrorCode(errorBody: string) {
+	let errorCode: WellKnownSIStorageServiceErrorCode | undefined;
+
+	try {
+		const error = JSON.parse(errorBody) as InternalError;
+		errorCode = error?.errorCode;
+	} catch { /** Do nothing */ }
+
+	return errorCode;
 }
