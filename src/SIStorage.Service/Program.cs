@@ -187,4 +187,5 @@ static void ApplyMigrations(WebApplication app)
 [JsonSerializable(typeof(RandomPackageParameters))]
 [JsonSerializable(typeof(SIStorageServiceError))]
 [JsonSerializable(typeof(CreatePackageResponse))]
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 internal partial class SIStorageContext : JsonSerializerContext { }
