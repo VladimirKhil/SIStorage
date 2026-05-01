@@ -29,7 +29,7 @@ spec:
         paths:
           {{- range .paths }}
           - path: {{ . }}/api/v1/(info|facets|packages)(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ $fullName }}

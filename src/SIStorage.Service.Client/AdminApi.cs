@@ -82,7 +82,7 @@ internal sealed class AdminApi : IAdminApi
 
     public async Task<Package> GetRandomPackageAsync(RandomPackageParameters randomPackageParameters, CancellationToken cancellationToken = default)
     {
-        using var response = await _client.PostAsJsonAsync("packages/random", randomPackageParameters, cancellationToken: cancellationToken);
+        using var response = await _client.PostAsJsonAsync("admin/random", randomPackageParameters, cancellationToken: cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
